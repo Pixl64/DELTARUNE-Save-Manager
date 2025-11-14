@@ -2,9 +2,15 @@
     "defaultChapter": 1,
     "maximumChapter": 4,
     "appID": 1671210,
+    "colors": {
+        "selectBackground": "#00c5ff",
+        "dropHighlight": "lightgreen",
+        "invalidHighlight": "lightcoral",
+        "dragWindowDefault": "lightblue"
+    },
     "dw_invItems": {
         "items": {
-            "0": "Empty",
+            "0": "---",
             "1": "Dark Candy",
             "2": "ReviveMint",
             "3": "Glowshard",
@@ -50,7 +56,7 @@
             "63": "BitterTear"
         },
         "keyItems": {
-            "0": "Empty",
+            "0": "---",
             "1": "Cell Phone",
             "2": "Egg",
             "3": "BrokenCake",
@@ -74,7 +80,7 @@
             "31": "ClaimbClaws"
         },
         "weapons": {
-            "0": "(Nothing)",
+            "0": "---",
             "1": "Wood Blade",
             "2": "Mane Ax",
             "3": "Red Scarf",
@@ -108,7 +114,7 @@
             "54": "AbsorbAx"
         },
         "armor": {
-            "0": "Empty",
+            "0": "---",
             "1": "Amber Card",
             "2": "Dice Brace",
             "3": "Pink Ribbon",
@@ -179,6 +185,12 @@
             "keyItem": 7,
             "weapon": 10,
             "armor": 7
+        },
+        "dw_partyMemberLocation": {
+            "kris": [70, 79],
+            "susie": [124, 133],
+            "ralsei": [178, 187],
+            "noelle": [-1, -1]
         }
     },
     "chapter2": {
@@ -219,6 +231,12 @@
             "keyItem": 15,
             "weapon": 22,
             "armor": 22
+        },
+        "dw_partyMemberLocation": {
+            "kris": [78, 87],
+            "susie": [140, 149],
+            "ralsei": [202, 211],
+            "noelle": [264, 273]
         }
     },
     "chapter3": {
@@ -246,10 +264,16 @@
             "storage": 24
         },
         "dw_invItemIdLimit": {
-            "item": 33,
-            "keyItem": 15,
-            "weapon": 22,
-            "armor": 22
+            "item": 39,
+            "keyItem": 19,
+            "weapon": 26,
+            "armor": 27
+        },
+        "dw_partyMemberLocation": {
+            "kris": [78, 87],
+            "susie": [140, 149],
+            "ralsei": [202, 211],
+            "noelle": [264, 273]
         }
     },
     "chapter4": {
@@ -291,6 +315,12 @@
             "keyItem": 31,
             "weapon": 54,
             "armor": 54
+        },
+        "dw_partyMemberLocation": {
+            "kris": [78, 87],
+            "susie": [140, 149],
+            "ralsei": [202, 211],
+            "noelle": [264, 273]
         }
     }
 }

@@ -1,4 +1,8 @@
-import os, subprocess, json, base64, configparser
+import os
+import json
+import base64
+import configparser
+import shutil
 
 from typing import TextIO
 
@@ -7,34 +11,21 @@ class CaseSensitiveConfigParser(configparser.ConfigParser):
         return optionstr
 
 def copyFile(src: str, dest: str):
-        subprocess.run(
-            f'copy "{src}" "{dest}"', 
-            shell=True, 
-            stdout=subprocess.DEVNULL
-        )
+    shutil.copy2(src, dest)
 
 def encodeSave(saveFile:TextIO) -> str:
     """
     Encodes a save file, and returns a base64 encoded string. Decoded by `decodeSave`
     """
-    # Read save file lines
     fileText = saveFile.readlines()
-    # Add line length at the start of the string.
     finalString = f"len\t{len(fileText)}\n"
-    # Loop through each line
+    
     for i, line in enumerate(fileText):
         strippedLine = line.strip()
-        # Ignore line if it is 0
-        if str(strippedLine) == "0":
-            pass
-        else:
-            # Add the line number and value.
+        if strippedLine != "0":
             finalString += f"{i}\t{strippedLine}\n"
     
-    # b64 encode string
-    encoded = base64.b64encode(str(finalString).encode("utf-8")).decode("utf-8")
-        
-    return encoded
+    return base64.b64encode(finalString.encode("utf-8")).decode("utf-8")
 
 def decodeSave(encoded: str) -> list:
     """
@@ -59,7 +50,7 @@ def decodeSave(encoded: str) -> list:
     return file_lines
 
 def constructSave(savePath:str, lines:list):
-    with open(savePath, "w+") as f:
+    with open(savePath, "w") as f:
         f.write("\n".join(lines))
 
 def makeINIKey(chapter:int, slot:int) -> str:
@@ -69,7 +60,7 @@ def makeINIKey(chapter:int, slot:int) -> str:
     return f"G_{chapter}_{slot}" if chapter != 1 else f"G{slot}"
 
 def getINIfor(chapter:int, slot:int, completeFlag:bool=False, encode:bool=False) -> str:
-    iniPath = os.path.join(os.environ["DR_SAVE_PATH"], f"dr.ini")
+    iniPath = os.path.join(os.environ["DR_SAVE_PATH"], "dr.ini")
     iniKey = makeINIKey(chapter, slot)
     iniKeyComplete = makeINIKey(chapter, slot+3)
 
@@ -100,16 +91,12 @@ def getINIfor(chapter:int, slot:int, completeFlag:bool=False, encode:bool=False)
     if "URA" in parser:
         uraData = parser["URA"]
         iniFile.append("[URA]")
-        # Find value that corresponds to the selected chapter and slot
         if f"{chapter}_{slot}" in uraData:
             uraValue = uraData[f"{chapter}_{slot}"]
             iniFile.append(f"{chapter}_0={uraValue}")
     
-    finalString = "\n".join(iniFile)
-    if encode:
-        return base64.b64encode(finalString.encode("utf-8")).decode("utf-8")
-    else:
-        return finalString
+    result = "\n".join(iniFile)
+    return base64.b64encode(result.encode("utf-8")).decode("utf-8") if encode else result
 
 def mergeIni(newChapter:int, newSlot:int, newIniString:str, currentIniFile:str):
     """
@@ -125,65 +112,41 @@ def mergeIni(newChapter:int, newSlot:int, newIniString:str, currentIniFile:str):
     iniKey = makeINIKey(newChapter, newSlot)
     iniKeyComplete = makeINIKey(newChapter, newSlot+3)
     
-    # Create the new INI section if it doesn't exist
-    if iniKey not in newIniDataParser:
-        newIniDataParser.add_section(iniKey)
-        # Copy the data from the section chapter `chapter` and slot 0
-        # Find the section in newIniDataParser that matches [G_{chapter}_0]
-        source_section = f'G_{newChapter}_0'
-        if newIniDataParser.has_section(source_section):
-            for key, value in newIniDataParser.items(source_section):
-                newIniDataParser[iniKey][key] = value
-        # Delete the source section to avoid duplication
-        newIniDataParser.remove_section(source_section)
-        
-    # Check if G_{newChapter}_3 exists
-    if f"G_{newChapter}_3" in newIniDataParser:
-        # Create the complete section if it doesn't exist
-        if iniKeyComplete not in newIniDataParser:
-            newIniDataParser.add_section(iniKeyComplete)
-            # Copy the data from the section chapter `chapter` and slot 3
-            source_section_complete = f'G_{newChapter}_3'
-            if newIniDataParser.has_section(source_section_complete):
-                for key, value in newIniDataParser.items(source_section_complete):
-                    newIniDataParser[iniKeyComplete][key] = value
-            # Delete the source section to avoid duplication
-            newIniDataParser.remove_section(source_section_complete)
+    # Helper function to copy section data
+    def copy_section(from_section: str, to_section: str):
+        if from_section in newIniDataParser:
+            if to_section not in newIniDataParser:
+                newIniDataParser.add_section(to_section)
+            for key, value in newIniDataParser.items(from_section):
+                newIniDataParser[to_section][key] = value
+            newIniDataParser.remove_section(from_section)
     
-    # Change the URA section from {chapter}_0 to {newChapter}_{newSlot}
-    if "URA" in newIniDataParser:
+    # Create the new INI section from slot 0 template
+    copy_section(f'G_{newChapter}_0', iniKey)
+    # Create the complete section from slot 3 template if it exists
+    copy_section(f'G_{newChapter}_3', iniKeyComplete)
+    
+    # Update URA section key from slot 0 to the target slot
+    if "URA" in newIniDataParser and f"{newChapter}_0" in newIniDataParser["URA"]:
         uraKey = f"{newChapter}_{newSlot}"
-        # Set the value for {newChapter}_{newSlot} in mergeIniParser["URA"] to the value of {chapter}_0 in newIniDataParser["URA"]
-        if f"{newChapter}_0" in newIniDataParser["URA"]:
-            uraValue = newIniDataParser["URA"][f"{newChapter}_0"]
-            if "URA" not in newIniDataParser:
-                newIniDataParser.add_section("URA")
-            newIniDataParser["URA"][uraKey] = uraValue
+        newIniDataParser["URA"][uraKey] = newIniDataParser["URA"][f"{newChapter}_0"]
     
     # Load the current INI file
     mergeIniParser = CaseSensitiveConfigParser()
     mergeIniParser.read(currentIniFile)
     
-    # Clear the existing data for the chapter and slot
-    iniKey = makeINIKey(newChapter, newSlot)
-    iniKeyComplete = makeINIKey(newChapter, newSlot+3)
+    # Helper function to update or create section
+    def update_section(section_key: str):
+        if section_key in newIniDataParser:
+            if section_key in mergeIniParser:
+                mergeIniParser.remove_section(section_key)
+            mergeIniParser.add_section(section_key)
+            for key, value in newIniDataParser[section_key].items():
+                mergeIniParser[section_key][key] = value
     
-    if iniKey in mergeIniParser:
-        # Remove old section
-        mergeIniParser.remove_section(iniKey)
-    # Add the new data to the INI file
-    mergeIniParser.add_section(iniKey)
-    for key, value in newIniDataParser[iniKey].items():
-        mergeIniParser[iniKey][key] = value
-    
-    if iniKeyComplete in newIniDataParser:
-        if iniKeyComplete in mergeIniParser:
-            # Remove old section
-            mergeIniParser.remove_section(iniKeyComplete)
-        # Add the new data to the INI file
-        mergeIniParser.add_section(iniKeyComplete)
-        for key, value in newIniDataParser[iniKeyComplete].items():
-            mergeIniParser[iniKeyComplete][key] = value
+    # Update main and complete sections
+    update_section(iniKey)
+    update_section(iniKeyComplete)
             
     # Check if the URA section exists and update it
     if "URA" in mergeIniParser:
@@ -201,33 +164,29 @@ def mergeIni(newChapter:int, newSlot:int, newIniString:str, currentIniFile:str):
 def backupSave(chapter:int, slot:int, backupPath:str, useComplete:bool=True):
     saveFilePath = os.path.join(os.environ["DR_SAVE_PATH"], f"filech{chapter}_{slot}")
     completeSaveFilePath = os.path.join(os.environ["DR_SAVE_PATH"], f"filech{chapter}_{slot+3}")
-    res = {}
     
-    # Check if save file is real
     if not os.path.exists(saveFilePath):
         raise FileNotFoundError(f"Save file filech{chapter}_{slot} does not exist.")
     
+    res = {}
+    
     # Get save file
     with open(saveFilePath, "r", encoding="UTF-8") as f:
-        saveFile = encodeSave(f)
-        res[f"filech{chapter}_0"] = saveFile
+        res[f"filech{chapter}_0"] = encodeSave(f)
     
-    
+    # Get complete save file if it exists
     completeFlag = False
-    # Get complete save file, if it exists.
-    if os.path.exists(completeSaveFilePath) and useComplete:
+    if useComplete and os.path.exists(completeSaveFilePath):
         with open(completeSaveFilePath, "r", encoding="UTF-8") as f:
-            completeSaveFile = encodeSave(f)
-        res[f"filech{chapter}_3"] = completeSaveFile
+            res[f"filech{chapter}_3"] = encodeSave(f)
         completeFlag = True
-        
-    # Get ini information.
-    iniData = getINIfor(chapter, slot, completeFlag=completeFlag, encode=True)
-    res["dr.ini"] = iniData
+    
+    # Get ini information
+    res["dr.ini"] = getINIfor(chapter, slot, completeFlag=completeFlag, encode=True)
     
     with open(backupPath, "w") as f:
         json.dump(res, f, indent=4)
-        
+    
     return True
 
 def restoreSave(backupPath:str, chapter:int, slot:int):
@@ -256,80 +215,65 @@ def restoreSave(backupPath:str, chapter:int, slot:int):
         
         mergeIni(chapter, slot, iniData, iniPath)
         
+def _find_room_name(roomId: int, saveData: dict, chapter: int) -> str:
+    """Helper function to find room name with fallback logic for Chapter 2."""
+    roomIdStr = str(roomId)
+    
+    if roomIdStr in saveData["roomNames"]:
+        return saveData["roomNames"][roomIdStr]
+    
+    # Chapter 2 fallback logic - try offsets
+    if chapter == 2:
+        for offset in [-1, 1, -2, 2]:
+            adjusted = str(roomId + offset)
+            if adjusted in saveData["roomNames"]:
+                return saveData["roomNames"][adjusted]
+    
+    return "Unknown Room"
+
 def getActiveDisplayData(chapter:int, appconfig:dict) -> dict:
     drSavePath = os.environ["DR_SAVE_PATH"]
     
-    # Get relevant files and sort
-    files = os.listdir(drSavePath)
-    saves = [f for f in files if f.startswith(f"filech{chapter}_") or f == "dr.ini"]
-    saves.sort()  
-    # Get the save data for the chapter.
     if f"chapter{chapter}" not in appconfig:
         raise ValueError(f"No configuration found for chapter {chapter}.")
     
     saveData = appconfig[f"chapter{chapter}"]
+    files = os.listdir(drSavePath)
+    saves = [f for f in files if f.startswith(f"filech{chapter}_") or f == "dr.ini"]
+    saves.sort()
     
     result = {
         "strings": [],
-        "slotData":[
-            # {
-            #   "isComplete": True|False
-            # },
-            {},{},{},
-        ],
+        "slotData": [{}, {}, {}],
     }
+    
     # Select correct room ID adjustment
-    match chapter:
-        case 1: adjust = 10000
-        case 2: adjust = 20000
-        case _: adjust = 0
+    adjust = {1: 10000, 2: 20000}.get(chapter, 0)
     
     for saveSlot in range(3):
-        if f"filech{chapter}_{saveSlot}" in saves:
-            with open(os.path.join(drSavePath, f"filech{chapter}_{saveSlot}")) as f:
-                # Get room ID from save file. from the line number stored in config[chapter][roomIDLineNumber]
-                lines = f.readlines()
-                roomIdLineNumber = saveData["roomIDLineNumber"]
-                roomId = int(lines[roomIdLineNumber-1].strip())
-                
-                result["slotData"][saveSlot]["exists"] = True
-                
-                # Adjust for DELTARUNEdemo to DELTARUNE room IDs.
-                if roomId < 9999:
-                    roomId += adjust
-                
-                if str(roomId) in saveData["roomNames"]:
-                    roomName = saveData["roomNames"][str(roomId)]
-                else:
-                    # For some reason chapter 2 doesn't like to use the right room ID. Hopefully this fixes it.
-                    if chapter == 2:
-                        # See if the room ID is one higher or lower than the one in the config.
-                        if str(roomId - 1) in saveData["roomNames"]:
-                            roomName = saveData["roomNames"][str(roomId - 1)]
-                        elif str(roomId + 1) in saveData["roomNames"]:
-                            roomName = saveData["roomNames"][str(roomId + 1)]
-                        else:
-                            # Try 2 higher or lower.
-                            if str(roomId - 2) in saveData["roomNames"]:
-                                roomName = saveData["roomNames"][str(roomId - 2)]
-                            elif str(roomId + 2) in saveData["roomNames"]:
-                                roomName = saveData["roomNames"][str(roomId + 2)]
-                            else:
-                                # Give up and set to unknown.
-                                roomName = "Unknown Room"
-                    else:
-                        roomName = "Unknown Room"
-                # Check for completed save file.
-                if os.path.exists(os.path.join(drSavePath, f"filech{chapter}_{saveSlot+3}")):
-                    completed = True
-                    result["slotData"][saveSlot]["isComplete"] = True
-                else:
-                    completed = False
-                    result["slotData"][saveSlot]["isComplete"] = False
-                result["strings"].append(f"Slot {saveSlot + 1}: [{roomName}] {' ★' if completed else ''}")
-                    
-        else:
+        saveFile = f"filech{chapter}_{saveSlot}"
+        
+        if saveFile not in saves:
             result["strings"].append(f"Slot {saveSlot + 1}: [EMPTY]")
             result["slotData"][saveSlot]["exists"] = False
-                
+            continue
+        
+        with open(os.path.join(drSavePath, saveFile)) as f:
+            lines = f.readlines()
+            roomIdLineNumber = saveData["roomIDLineNumber"]
+            roomId = int(lines[roomIdLineNumber - 1].strip())
+            
+            # Adjust for DELTARUNEdemo to DELTARUNE room IDs
+            if roomId < 9999:
+                roomId += adjust
+            
+            roomName = _find_room_name(roomId, saveData, chapter)
+            
+            # Check for completed save file
+            completed = os.path.exists(os.path.join(drSavePath, f"filech{chapter}_{saveSlot+3}"))
+            
+            result["slotData"][saveSlot]["exists"] = True
+            result["slotData"][saveSlot]["isComplete"] = completed
+            result["strings"].append(f"Slot {saveSlot + 1}: [{roomName}]{' ★' if completed else ''}")
+    
     return result

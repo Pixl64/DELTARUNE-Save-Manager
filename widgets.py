@@ -42,7 +42,8 @@ class ActiveFrame(Frame):
         self.appConfig = appConfig
         self.maxChapter = appConfig["maximumChapter"]
         
-        self.listbox = Listbox(self, selectmode='single', height=3, selectbackground=os.environ["SELECT_COL"], width=40, exportselection=False)
+        selectColor = appConfig.get("colors", {}).get("selectBackground", "#00c5ff")
+        self.listbox = Listbox(self, selectmode='single', height=3, selectbackground=selectColor, width=40, exportselection=False)
         self.listbox.pack(fill='both', expand=True)
         self.currentChapter = appConfig["defaultChapter"]
         self.activeSavesData = getActiveDisplayData(self.currentChapter, self.appConfig)
@@ -95,7 +96,8 @@ class BackupFrame(Frame):
         self.displayPath = StringVar(self)
         self.displayEntry = Entry(self, textvariable=self.displayPath, width=40, exportselection=False)
         self.displayEntry.config(state=DISABLED)
-        self.backupListbox = ScrollableListbox(self, selectbackground=os.environ.get("SELECT_COL"))
+        selectColor = appConfig.get("colors", {}).get("selectBackground", "#00c5ff")
+        self.backupListbox = ScrollableListbox(self, selectbackground=selectColor)
         # Bind a command to selecting an item in the listbox
         self.backupListbox.bind('<<ListboxSelect>>', lambda _: self.listBoxSelectCommand())
         # Bind double click to open the folder
@@ -281,7 +283,7 @@ class RightButtonBox(LabelFrame):
         self.button4.grid(row=3, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
         self.button5 = Button(self, text="Launch Game", command=launch_command)
         self.button5.grid(row=4, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
-        self.button6 = Button(self, text="Edit Active Save", command=edit_save_command, state=DISABLED)
+        self.button6 = Button(self, text="Edit Active Save", command=edit_save_command)
         self.button6.grid(row=5, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
         self.button8 = Button(self, text="Download Example Saves", command=download_example_saves_command, state=DISABLED)
         self.button8.grid(row=6, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)

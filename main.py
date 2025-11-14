@@ -23,9 +23,9 @@ from tkinter.messagebox import askyesno, askyesnocancel
 from widgets import ChapterSelectFrame, ActiveFrame, BackupFrame, RightButtonBox, setWindowIcon
 from popup import FirstTimeSetup, GameSelectPopup, SettingsPopup, BackupCreatePopup
 from filemanager import backupSave, restoreSave, copyFile
+from invread import SaveFileEdit
 
 # Global variables
-os.environ["SELECT_COL"] = "#00c5ff"
 os.environ["DSM_PATH"] = runningDir
 os.environ["DSM_DATA_PATH"] = dataPath
 
@@ -122,6 +122,7 @@ class App(Tk):
                                         settings_command=self.showSettings,
                                         launch_command=self.launchGame,
                                         delete_save_command=self.deleteSave,
+                                        edit_save_command=self.editSave,
                                         exit_command=self.exit                                        
                                     )
         
@@ -247,6 +248,21 @@ class App(Tk):
             os.startfile(f'"{exe_path}"')
             os.chdir(os.environ["DSM_PATH"])
 
+    def editSave(self):
+        # Get currently selected save slot and chapter
+        currentSave = self.activeSaves.getSelectedSaveSlot()
+        
+        # Checks
+        if currentSave == -1:
+            showerror(title="Error", message="Please select a save to edit.")
+            return
+        if not currentSave["exists"]:
+            showerror(title="Error", message="Selected save does not exist.")
+            return
+        
+        
+        popup = SaveFileEdit(self, currentSave["chapter"], currentSave["slot"], self.appConfig["dw_invItems"], self.appConfig[f"chapter{currentSave['chapter']}"], self.appConfig, title=f"Editing save from Ch{currentSave['chapter']} slot {currentSave['slot']+1}")
+        
     def deleteSave(self):
         # Get currently selected backup save
         currentBackup = self.backupSaves.getSelectedSave()
