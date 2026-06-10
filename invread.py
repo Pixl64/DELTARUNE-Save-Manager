@@ -5,7 +5,7 @@ from typing import TextIO
 
 from tkinter import Tk, Toplevel, Frame, LabelFrame, Label, Button
 from tkinter.simpledialog import Dialog
-from tkinter.constants import *
+from tkinter.constants import END, LEFT, RIGHT, TOP, BOTTOM, X, BOTH, NW, N
 from tkinter.messagebox import askyesno
 
 from customlistbox import DragManager, DraggableListbox, DraggableScrollableListbox
@@ -62,7 +62,6 @@ class StorageContainer(LabelFrame):
         for r in range(self.rows):
             row_listboxes = []
             for c in range(self.cols):
-                idx = r * self.cols + c
                 lb = DraggableListbox(self.gridFrame, self.dragManager, self.dw_invItems, self.chapterLimits, self.currentChapter, allowInternalSwap=True, appConfig=self.chapterLimits, height=1, width=18)
                 lb.grid(row=r, column=c, padx=2, pady=1, sticky="ew")
                 row_listboxes.append(lb)
@@ -171,7 +170,7 @@ class StorageContainer(LabelFrame):
         # Create new window
         view_all_window = Toplevel(self)
         view_all_window.title("Storage - View All Items")
-        view_all_window.transient(self)
+        view_all_window.transient(self) # pyright: ignore[reportArgumentType, reportCallIssue]
         view_all_window.grab_set()
         
         # Create a separate drag manager for this window
@@ -185,12 +184,10 @@ class StorageContainer(LabelFrame):
         total_main_pages = self.page_count()
         
         # Create frames and listboxes for each page
-        page_frames = []
         all_listboxes = []
         
         # Calculate grid layout for page frames (2 columns)
         page_cols = 2
-        page_rows = (total_main_pages + page_cols - 1) // page_cols
         
         for page_num in range(total_main_pages):
             # Calculate position in the grid
@@ -200,7 +197,6 @@ class StorageContainer(LabelFrame):
             # Create labeled frame for this page
             page_frame = LabelFrame(main_frame, text=f"Page {page_num + 1}")
             page_frame.grid(row=frame_row, column=frame_col, padx=10, pady=10, sticky="nsew")
-            page_frames.append(page_frame)
             
             # Create 2x6 grid of listboxes within this page frame
             page_listboxes = []
@@ -337,8 +333,10 @@ class SaveFileEdit(Dialog):
         
         self.dragManager = DragManager(parent, fullConfig)
         
-        if self.chapter == 1: self.savePattern = "ch1"
-        else: self.savePattern = "ch2+"
+        if self.chapter == 1:
+            self.savePattern = "ch1"
+        else:
+            self.savePattern = "ch2+"
         
         with open(os.path.join(os.environ["DR_SAVE_PATH"], f"filech{self.chapter}_{self.slot}")) as f:
             self.saveData = self.getSaveFileItemData(f)
@@ -708,8 +706,9 @@ class SaveFileEdit(Dialog):
             "storage": []
         }
             
+        # Read the file into a list of lines for subsequent parsing
+        fileList = file.readlines()
         if self.savePattern == "ch1":
-            fileList = file.readlines()
             start = self.chapterData["dw_invStart"]
             end = self.chapterData["dw_invEnd"]
             items = fileList[start-1:end]
@@ -734,7 +733,6 @@ class SaveFileEdit(Dialog):
                 resDict["party"][character] = self._read_character_equipment(fileList, character)
             
         if self.savePattern == "ch2+":
-            fileList = file.readlines()
             invStart = self.chapterData["dw_invStart"]
             invEnd = self.chapterData["dw_invEnd"]
             items = fileList[invStart-1:invEnd]
@@ -781,7 +779,8 @@ class SaveFileEdit(Dialog):
 
 if __name__ == "__main__":
     runningDir = os.path.dirname(os.path.realpath(__file__))
-    os.environ["DR_SAVE_PATH"] = os.path.join(os.getenv("LOCALAPPDATA"),"DELTARUNE")
+    localAppData = os.getenv("LOCALAPPDATA") or ""
+    os.environ["DR_SAVE_PATH"] = os.path.join(localAppData, "DELTARUNE")
     with open(os.path.join(runningDir, "app_config.json"), "r", encoding="utf-8") as v:
         cfg = json.load(v)
     

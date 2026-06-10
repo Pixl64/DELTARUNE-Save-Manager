@@ -436,8 +436,12 @@ class ActiveSaveLocationSelectorFrame(LabelFrame):
                 
     def getValue(self):
         match self.selectedOption.get():
-            case 1: return {"type": "default"}
-            case 2: return {"type": "custom", "path": self.saveDir}
+            case 1: 
+                return {"type": "default"}
+            case 2: 
+                return {"type": "custom", "path": self.saveDir}
+            case _: 
+                return {"type": "default"}
             
     def setValue(self, value:dict):
         if not value:

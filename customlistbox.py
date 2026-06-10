@@ -1,14 +1,14 @@
 import re
-from typing import Optional
+from typing import Optional, Union
 
-from tkinter import Toplevel, Frame, Label, Listbox, Scrollbar, Menu
+from tkinter import Widget, Toplevel, Frame, Label, Listbox, Scrollbar, Menu
 from tkinter.constants import SINGLE, VERTICAL, LEFT, BOTH, RIGHT, Y, END, RAISED
 import tkinter.messagebox as messagebox
 
 class DraggableListbox(Listbox):
     """A Listbox with drag-and-drop functionality and context menu support."""
     
-    def __init__(self, parent:Frame, dragManager:'DragManager', dw_invItems=None, chapterLimits=None, currentChapter=1, allowInternalSwap=True, appConfig=None, **kwargs):
+    def __init__(self, parent:Widget, dragManager:'DragManager', dw_invItems=None, chapterLimits=None, currentChapter=1, allowInternalSwap=True, appConfig=None, **kwargs):
         # Set default selectbackground if not provided
         if 'selectbackground' not in kwargs:
             if appConfig and 'colors' in appConfig:
@@ -202,7 +202,7 @@ class DraggableListbox(Listbox):
         """Replace the item at the given index with a new item ID"""
         self.setItemId(index, new_item_id)
         
-    def insertWithId(self, index: int, itemId: int, tag: str) -> None:
+    def insertWithId(self, index: Union[int, str], itemId: int, tag: str) -> None:
         """Insert an item with an associated ID and tag, converting ID to display name"""
         # Get item name from app_config based on tag
         displayText = self._getItemName(itemId, tag)
@@ -328,7 +328,7 @@ class DraggableScrollableListbox(Frame):
         self.scrollbar.pack(side=RIGHT, fill=Y)
     
     # Delegate methods to the inner listbox
-    def insertWithId(self, index: int, itemId: int, tag: str) -> None:
+    def insertWithId(self, index: Union[int, str], itemId: int, tag: str) -> None:
         """Insert an item with ID and tag."""
         self.listbox.insertWithId(index, itemId, tag)
         
