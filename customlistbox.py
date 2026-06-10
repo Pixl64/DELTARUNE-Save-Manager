@@ -1,13 +1,14 @@
 import re
+from typing import Optional
 
 from tkinter import Toplevel, Frame, Label, Listbox, Scrollbar, Menu
-from tkinter.constants import *
+from tkinter.constants import SINGLE, VERTICAL, LEFT, BOTH, RIGHT, Y, END, RAISED
 import tkinter.messagebox as messagebox
 
 class DraggableListbox(Listbox):
     """A Listbox with drag-and-drop functionality and context menu support."""
     
-    def __init__(self, parent, dragManager, dw_invItems=None, chapterLimits=None, currentChapter=1, allowInternalSwap=True, appConfig=None, **kwargs):
+    def __init__(self, parent:Frame, dragManager:'DragManager', dw_invItems=None, chapterLimits=None, currentChapter=1, allowInternalSwap=True, appConfig=None, **kwargs):
         # Set default selectbackground if not provided
         if 'selectbackground' not in kwargs:
             if appConfig and 'colors' in appConfig:
@@ -34,7 +35,7 @@ class DraggableListbox(Listbox):
         
         self.setupBindings()
         
-    def setupBindings(self):
+    def setupBindings(self) -> None:
         """Set up mouse event bindings for drag-and-drop and context menu."""
         self.bind("<Button-1>", self._onStartDrag)   # Left mouse button press (Listbox drag start)
         self.bind("<B1-Motion>", self._onDrag)       # Mouse movement with button held down (Dragging listbox item)
@@ -51,7 +52,7 @@ class DraggableListbox(Listbox):
         "armor": "armor"
     }
     
-    def _onRightClick(self, event):
+    def _onRightClick(self, event) -> None:
         """Handle right-click to show Windows Explorer-style context menu"""
         index = self.nearest(event.y)
         
@@ -72,7 +73,7 @@ class DraggableListbox(Listbox):
                 
                 self._showContextMenu(event, index, itemTag, availableItems)
     
-    def _getChapterForItem(self, itemId, itemType):
+    def _getChapterForItem(self, itemId: int, itemType: str) -> int:
         """Determine which chapter an item was added in based on chapter limits from config"""
         item_id_int = int(itemId)
         typeKey = "item" if itemType == "items" else itemType
@@ -96,11 +97,11 @@ class DraggableListbox(Listbox):
         # If item ID is higher than all limits, return the last chapter or default to 1
         return chapter_limits[-1][0] if chapter_limits else 1
     
-    def _formatItemType(self, itemTag):
+    def _formatItemType(self, itemTag: str) -> str:
         """Convert camelCase item tag to Title Case (e.g., 'keyItem' -> 'Key Item')."""
         return re.sub(r'(?<!^)(?=[A-Z])', ' ', itemTag).title()
     
-    def _showContextMenu(self, event, index, itemTag, availableItems):
+    def _showContextMenu(self, event, index: int, itemTag: str, availableItems: dict) -> None:
         """Show a Windows Explorer-style context menu"""
         # Get custom highlight color from config
         selectColor = self.colors.get('selectBackground', '#00c5ff')
@@ -182,7 +183,7 @@ class DraggableListbox(Listbox):
         finally:
             context_menu.grab_release()
     
-    def _getCurrentChapter(self):
+    def _getCurrentChapter(self) -> int:
         """Get the current chapter number."""
         if hasattr(self, 'currentChapter'):
             return self.currentChapter
@@ -197,11 +198,11 @@ class DraggableListbox(Listbox):
         
         return 1
     
-    def _replaceItem(self, index, new_item_id):
+    def _replaceItem(self, index: int, new_item_id: int) -> None:
         """Replace the item at the given index with a new item ID"""
         self.setItemId(index, new_item_id)
         
-    def insertWithId(self, index, itemId, tag):
+    def insertWithId(self, index: int, itemId: int, tag: str) -> None:
         """Insert an item with an associated ID and tag, converting ID to display name"""
         # Get item name from app_config based on tag
         displayText = self._getItemName(itemId, tag)
@@ -217,13 +218,15 @@ class DraggableListbox(Listbox):
         self.itemTags[actualIndex] = tag
         self._updateIndices()
     
-    def _getItemName(self, itemId, tag):
+    def _getItemName(self, itemId: Optional[int], tag: str) -> str:
         """Get item name from app_config based on ID and tag."""
+        if itemId is None:
+            return f"Unknown {tag} (None)"
         category = self.CATEGORY_MAP.get(tag, "items")
         itemDict = self.dw_invItems.get(category, {})
         return itemDict.get(str(itemId), f"Unknown {tag} ({itemId})")
     
-    def deleteItem(self, index):
+    def deleteItem(self, index: int) -> None:
         """Delete an item and update internal tracking indices."""
         if index in self.itemTags:
             del self.itemTags[index]
@@ -232,7 +235,7 @@ class DraggableListbox(Listbox):
         self.delete(index)
         self._updateIndices()
     
-    def _updateIndices(self):
+    def _updateIndices(self) -> None:
         """Update tag and ID indices after insertions/deletions."""
         newTags = {}
         newIds = {}
@@ -249,27 +252,29 @@ class DraggableListbox(Listbox):
         self.itemTags = newTags
         self.itemIds = newIds
     
-    def getItemTag(self, index):
+    def getItemTag(self, index: int) -> Optional[str]:
         """Get the tag for an item at the given index"""
         return self.itemTags.get(index, None)
     
-    def getItemId(self, index):
+    def getItemId(self, index: int) -> Optional[int]:
         """Get the ID for an item at the given index"""
         return self.itemIds.get(index, None)
     
-    def setItemTag(self, index, tag):
+    def setItemTag(self, index: int, tag: str) -> None:
         """Set the tag for an item at the given index"""
         self.itemTags[index] = tag
         
-    def setItemId(self, index, itemId):
+    def setItemId(self, index: int, itemId: int) -> None:
         """Set the ID for an item at the given index and update display"""
         self.itemIds[index] = itemId
         tag = self.getItemTag(index)
+        if tag is None:
+            tag = "item"  # Default fallback
         displayText = self._getItemName(itemId, tag)
         self.delete(index)
         self.insert(index, displayText)
         
-    def setDropHighlight(self, enabled=True):
+    def setDropHighlight(self, enabled: bool = True) -> None:
         """Set the background color to indicate valid drop zone."""
         if enabled:
             color = self.colors.get('dropHighlight', 'lightgreen')
@@ -277,7 +282,7 @@ class DraggableListbox(Listbox):
         else:
             self.config(bg=self.originalBg)
     
-    def setInvalidHighlight(self, enabled=True):
+    def setInvalidHighlight(self, enabled: bool = True) -> None:
         """Set the background color to indicate invalid drop zone."""
         if enabled:
             color = self.colors.get('invalidHighlight', 'lightcoral')
@@ -285,30 +290,30 @@ class DraggableListbox(Listbox):
         else:
             self.config(bg=self.originalBg)
     
-    def clearHighlight(self):
+    def clearHighlight(self) -> None:
         """Clear any highlighting and restore original background."""
         self.config(bg=self.originalBg)
         
     # Event handlers for drag and drop
-    def _onStartDrag(self, event):
+    def _onStartDrag(self, event) -> None:
         self.dragManager.startDrag(self, event)
     
-    def _onDrag(self, event):
+    def _onDrag(self, event) -> None:
         self.dragManager.onDrag(event)
     
-    def _onDrop(self, event):
+    def _onDrop(self, event) -> None:
         self.dragManager.onDrop(event)
     
-    def _onEnterListbox(self, event):
+    def _onEnterListbox(self, event) -> None:
         self.dragManager.onEnterListbox(event)
     
-    def _onLeaveListbox(self, event):
+    def _onLeaveListbox(self, event) -> None:
         self.dragManager.onLeaveListbox(event)
 
 class DraggableScrollableListbox(Frame):
     """A scrollable wrapper for DraggableListbox with vertical scrollbar."""
     
-    def __init__(self, parent, dragManager, dw_invItems=None, chapterLimits=None, 
+    def __init__(self, parent, dragManager: 'DragManager', dw_invItems=None, chapterLimits=None, 
                  currentChapter=1, allowInternalSwap=True, appConfig=None, **kwargs):
         super().__init__(parent)
         
@@ -323,31 +328,31 @@ class DraggableScrollableListbox(Frame):
         self.scrollbar.pack(side=RIGHT, fill=Y)
     
     # Delegate methods to the inner listbox
-    def insertWithId(self, index, itemId, tag):
+    def insertWithId(self, index: int, itemId: int, tag: str) -> None:
         """Insert an item with ID and tag."""
         self.listbox.insertWithId(index, itemId, tag)
         
-    def deleteItem(self, index):
+    def deleteItem(self, index: int) -> None:
         """Delete an item."""
         self.listbox.deleteItem(index)
         
-    def getItemTag(self, index):
+    def getItemTag(self, index: int) -> Optional[str]:
         """Get item tag at index."""
         return self.listbox.getItemTag(index)
     
-    def getItemId(self, index):
+    def getItemId(self, index: int) -> Optional[int]:
         """Get item ID at index."""
         return self.listbox.getItemId(index)
     
-    def setItemTag(self, index, tag):
+    def setItemTag(self, index: int, tag: str) -> None:
         """Set item tag at index."""
         self.listbox.setItemTag(index, tag)
         
-    def setItemId(self, index, itemId):
+    def setItemId(self, index: int, itemId: int) -> None:
         """Set item ID at index."""
         self.listbox.setItemId(index, itemId)
 
-    def getListbox(self):
+    def getListbox(self) -> DraggableListbox:
         """Get the inner listbox widget."""
         return self.listbox
 
@@ -362,8 +367,8 @@ class DragManager:
         self.page_navigation_buttons = []  # List of (button, callback) tuples
         
         # Variables to track dragging
-        self.dragStartListbox = None
-        self.dragStartIndex = None
+        self.dragStartListbox: Optional[DraggableListbox] = None
+        self.dragStartIndex: Optional[int] = None
         self.dragData = None
         self.dragTag = None
         self.dragId = None
@@ -371,15 +376,15 @@ class DragManager:
         # Create drag visualization window (initially hidden)
         self.dragWindow = None
     
-    def registerListbox(self, listbox):
+    def registerListbox(self, listbox: DraggableListbox) -> None:
         """Register a listbox with the drag manager."""
         self.listboxes.append(listbox)
     
-    def registerPageButton(self, button, callback):
+    def registerPageButton(self, button, callback) -> None:
         """Register a page navigation button with the drag manager."""
         self.page_navigation_buttons.append((button, callback))
     
-    def createDragWindow(self):
+    def createDragWindow(self) -> None:
         """Create the drag visualization window"""
         self.dragWindow = Toplevel(self.root)
         self.dragWindow.wm_overrideredirect(True)
@@ -394,12 +399,13 @@ class DragManager:
         self.dragLabel.pack()
         self.dragWindow.withdraw()
     
-    def _updateDragWindowStyle(self, color):
+    def _updateDragWindowStyle(self, color: str) -> None:
         """Update drag window background color and relief style."""
-        self.dragWindow.configure(bg=color)
-        self.dragLabel.configure(bg=color, relief=RAISED)
+        if self.dragWindow is not None:
+            self.dragWindow.configure(bg=color)
+            self.dragLabel.configure(bg=color, relief=RAISED)
     
-    def _cancelDrag(self):
+    def _cancelDrag(self) -> None:
         """Cancel the current drag operation"""
         # Clear all highlights
         self._clearAllHighlights()
@@ -417,7 +423,7 @@ class DragManager:
         self.dragTag = None
         self.dragId = None
     
-    def startDrag(self, sourceListbox, event):
+    def startDrag(self, sourceListbox: DraggableListbox, event) -> None:
         """Start a drag operation"""
         index = sourceListbox.nearest(event.y)
         
@@ -453,15 +459,16 @@ class DragManager:
             self._updateDragWindowStyle(defaultColor)
             
             x, y = self.root.winfo_pointerxy()
-            self.dragWindow.geometry(f"+{x+10}+{y+10}")
-            self.dragWindow.deiconify()  # Show the window
+            if self.dragWindow is not None:
+                self.dragWindow.geometry(f"+{x+10}+{y+10}")
+                self.dragWindow.deiconify()  # Show the window
             
             # Highlight valid drop zones
             self._highlightValidDropZones()
     
-    def _highlightValidDropZones(self):
+    def _highlightValidDropZones(self) -> None:
         """Highlight all listboxes that can accept the dragged item"""
-        if self.dragStartListbox is None:
+        if self.dragStartListbox is None or self.dragStartIndex is None:
             return
         
         for listbox in self.listboxes:
@@ -487,13 +494,13 @@ class DragManager:
             if not canAccept:
                 listbox.setInvalidHighlight(True)
     
-    def _clearAllHighlights(self):
+    def _clearAllHighlights(self) -> None:
         """Clear highlighting from all listboxes"""
         for listbox in self.listboxes:
             listbox.setDropHighlight(False)
             listbox.setInvalidHighlight(False)
     
-    def canSwapItems(self, sourceListbox, sourceIndex, targetListbox, targetIndex):
+    def canSwapItems(self, sourceListbox: DraggableListbox, sourceIndex: int, targetListbox: DraggableListbox, targetIndex: int) -> bool:
         """Check if two items can be swapped based on their tags"""
         sourceTag = sourceListbox.getItemTag(sourceIndex)
         targetTag = targetListbox.getItemTag(targetIndex)
@@ -503,7 +510,7 @@ class DragManager:
         # 2. Both have the same tag
         return sourceTag == targetTag
     
-    def _findActualListbox(self, widget):
+    def _findActualListbox(self, widget) -> Optional[DraggableListbox]:
         """Find the actual listbox widget (handles scrollable containers)"""
         # If it's a DraggableListbox, return it
         if isinstance(widget, DraggableListbox):
@@ -520,10 +527,10 @@ class DragManager:
                 
         return None
     
-    def onDrag(self, event):
+    def onDrag(self, event) -> None:
         """Handle drag motion"""
         # Handle drag motion if we have an active drag
-        if self.dragStartListbox is not None and self.dragWindow is not None:
+        if self.dragStartListbox is not None and self.dragWindow is not None and self.dragStartIndex is not None:
             # Update drag window position
             x, y = self.root.winfo_pointerxy()
             self.dragWindow.geometry(f"+{x+10}+{y+10}")
@@ -572,9 +579,9 @@ class DragManager:
                 invalidColor = self.colors.get('invalidHighlight', 'lightcoral')
                 self._updateDragWindowStyle(invalidColor)
     
-    def onDrop(self, event):
+    def onDrop(self, event) -> None:
         """Handle drop operation"""
-        if self.dragStartListbox is not None:
+        if self.dragStartListbox is not None and self.dragStartIndex is not None:
             # Get the widget under the mouse cursor
             x, y = self.root.winfo_pointerxy()
             widget = self.root.winfo_containing(x, y)
@@ -601,11 +608,13 @@ class DragManager:
                         startTag = self.dragStartListbox.getItemTag(self.dragStartIndex)
                         dropTag = targetListbox.getItemTag(dropIndex)
                         
-                        self.dragStartListbox.setItemId(self.dragStartIndex, dropId)
-                        self.dragStartListbox.setItemTag(self.dragStartIndex, dropTag)
-                        
-                        targetListbox.setItemId(dropIndex, startId)
-                        targetListbox.setItemTag(dropIndex, startTag)
+                        # Only proceed if all values are not None
+                        if startId is not None and dropId is not None and startTag is not None and dropTag is not None:
+                            self.dragStartListbox.setItemId(self.dragStartIndex, dropId)
+                            self.dragStartListbox.setItemTag(self.dragStartIndex, dropTag)
+                            
+                            targetListbox.setItemId(dropIndex, startId)
+                            targetListbox.setItemTag(dropIndex, startTag)
                         
                         # Update selection
                         for listbox in self.listboxes:
@@ -628,12 +637,12 @@ class DragManager:
         self.dragTag = None
         self.dragId = None
     
-    def onEnterListbox(self, event):
+    def onEnterListbox(self, event) -> None:
         """Handle mouse entering a listbox during drag"""
         if self.dragStartListbox is not None:
             event.widget.config(cursor="hand2")
     
-    def onLeaveListbox(self, event):
+    def onLeaveListbox(self, event) -> None:
         """Handle mouse leaving a listbox during drag"""
         if self.dragStartListbox is not None:
             if event.widget != self.dragStartListbox:
