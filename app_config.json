@@ -186,6 +186,7 @@
             "weapon": 10,
             "armor": 7
         },
+        "dw_darkDollarLine": 11,
         "dw_partyMemberLocation": {
             "kris": [70, 79],
             "susie": [124, 133],
@@ -232,6 +233,7 @@
             "weapon": 22,
             "armor": 22
         },
+        "dw_darkDollarLine": 11,
         "dw_partyMemberLocation": {
             "kris": [78, 87],
             "susie": [140, 149],
@@ -269,6 +271,8 @@
             "weapon": 26,
             "armor": 27
         },
+        "dw_darkDollarLine": 11,
+        "dw_pointsLine": 1597,
         "dw_partyMemberLocation": {
             "kris": [78, 87],
             "susie": [140, 149],
@@ -316,6 +320,8 @@
             "weapon": 54,
             "armor": 54
         },
+        "dw_darkDollarLine": 11,
+        "dw_pointsLine": 1597,
         "dw_partyMemberLocation": {
             "kris": [78, 87],
             "susie": [140, 149],

@@ -3,7 +3,7 @@ import json
 import copy
 from typing import TextIO
 
-from tkinter import Tk, Toplevel, Frame, LabelFrame, Label, Button
+from tkinter import Tk, Toplevel, Frame, LabelFrame, Label, Button, Entry, StringVar
 from tkinter.simpledialog import Dialog
 from tkinter.constants import END, LEFT, RIGHT, TOP, BOTTOM, X, BOTH, NW, N
 from tkinter.messagebox import askyesno
@@ -383,6 +383,19 @@ class SaveFileEdit(Dialog):
         self.keyItemsContainer.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=(0,5))
         self.row2Frame.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=(0,5))
 
+        self.statsFrame = LabelFrame(self.mainFrame, text="Save Stats")
+        self.darkDollarVar = StringVar(value=str(self.saveData.get("darkDollar", 0)))
+        self.pointsVar = StringVar(value=str(self.saveData.get("points", 0)))
+
+        Label(self.statsFrame, text="Dark Dollars:").pack(side=LEFT, padx=(5,2), pady=5)
+        Entry(self.statsFrame, textvariable=self.darkDollarVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+
+        if "dw_pointsLine" in self.chapterData:
+            Label(self.statsFrame, text="Points:").pack(side=LEFT, padx=(5,2), pady=5)
+            Entry(self.statsFrame, textvariable=self.pointsVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+
+        self.statsFrame.pack(side=TOP, fill=X, padx=5, pady=(0,5))
+
         # Row 3: Items and Storage (side by side)
         self.row3Frame = Frame(self.mainFrame)
         # Format Items inventory like Storage (grid with pages) but without View All button
@@ -450,7 +463,8 @@ class SaveFileEdit(Dialog):
             "Party Equipment Changes": [],
             "Weapon & Armor Inventory Changes": [],
             "Key Item Changes": [],
-            "Item & Storage Changes": []
+            "Item & Storage Changes": [],
+            "Save Stat Changes": []
         }
         
         # Check party member equipment changes
@@ -500,6 +514,12 @@ class SaveFileEdit(Dialog):
                     oldName = self._getItemName(original["storage"][i], "item")
                     newName = self._getItemName(current["storage"][i], "item")
                     changes["Item & Storage Changes"].append(f"Storage Slot {i+1}: \"{oldName}\" → \"{newName}\"")
+
+        if original.get("darkDollar") != current.get("darkDollar"):
+            changes["Save Stat Changes"].append(f"Dark Dollars: \"{original.get('darkDollar')}\" → \"{current.get('darkDollar')}\"")
+
+        if original.get("points") != current.get("points"):
+            changes["Save Stat Changes"].append(f"Points: \"{original.get('points')}\" → \"{current.get('points')}\"")
         
         return changes
     
@@ -517,7 +537,9 @@ class SaveFileEdit(Dialog):
             "keyItems": self.keyItemsContainer.getSelected(),
             "weapons": self.weaponItems.getSelected(),
             "armor": self.armorItems.getSelected(),
-            "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else []
+            "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
+            "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
+            "points": self._parse_int(self.pointsVar.get(), self.saveData.get("points", 0))
         }
         
         # Generate change report with categories
@@ -560,7 +582,9 @@ class SaveFileEdit(Dialog):
             "keyItems": self.keyItemsContainer.getSelected(),
             "weapons": self.weaponItems.getSelected(),
             "armor": self.armorItems.getSelected(),
-            "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else []
+            "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
+            "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
+            "points": self._parse_int(self.pointsVar.get(), self.saveData.get("points", 0))
         }
         
         # Write the save file
@@ -576,6 +600,16 @@ class SaveFileEdit(Dialog):
             "armor1": int(fileList[base_idx + 7].strip()),
             "armor2": int(fileList[base_idx + 8].strip())
         }
+
+    def _parse_int(self, value: str, default: int = 0) -> int:
+        """Safely parse an integer value from a string."""
+        try:
+            return int(value.strip())
+        except (ValueError, AttributeError):
+            try:
+                return int(float(value.strip()))
+            except (ValueError, AttributeError):
+                return default
     
     def _write_character_equipment(self, fileList: list, character: str, equipment: dict):
         """Helper method to write character equipment to save file."""
@@ -652,7 +686,17 @@ class SaveFileEdit(Dialog):
             for i, storage_item in enumerate(self.result["storage"]):
                 if storageStart - 1 + i < len(fileList):
                     fileList[storageStart - 1 + i] = f"{storage_item}\n"
-        
+
+        if "dw_darkDollarLine" in self.chapterData:
+            darkDollarIdx = self.chapterData["dw_darkDollarLine"] - 1
+            if 0 <= darkDollarIdx < len(fileList):
+                fileList[darkDollarIdx] = f"{self.result['darkDollar']}\n"
+
+        if "dw_pointsLine" in self.chapterData:
+            pointsIdx = self.chapterData["dw_pointsLine"] - 1
+            if 0 <= pointsIdx < len(fileList):
+                fileList[pointsIdx] = f"{self.result.get('points', 0)}\n"
+
         # Write the modified content back to the file
         with open(save_file_path, 'w') as f:
             f.writelines(fileList)
@@ -703,7 +747,9 @@ class SaveFileEdit(Dialog):
             "keyItems": [],
             "weapons": [],
             "armor": [],
-            "storage": []
+            "storage": [],
+            "darkDollar": 0,
+            "points": 0
         }
             
         # Read the file into a list of lines for subsequent parsing
@@ -771,10 +817,20 @@ class SaveFileEdit(Dialog):
             # Check if the storage count matches the expected value
             if storageLength != storageEnd - storageStart + 1:
                 raise ValueError(f"Invalid storage count in save file. Expected {storageLength} storage items instead of {storageEnd - storageStart + 1}.")
-        
+
             storageItems = fileList[storageStart-1:storageEnd]
             resDict["storage"] = [int(item.strip()) for item in storageItems]
-        
+
+        if "dw_darkDollarLine" in self.chapterData:
+            darkDollarIdx = self.chapterData["dw_darkDollarLine"] - 1
+            if 0 <= darkDollarIdx < len(fileList):
+                resDict["darkDollar"] = int(fileList[darkDollarIdx].strip())
+
+        if "dw_pointsLine" in self.chapterData:
+            pointsIdx = self.chapterData["dw_pointsLine"] - 1
+            if 0 <= pointsIdx < len(fileList):
+                resDict["points"] = int(float(fileList[pointsIdx].strip()))
+
         return resDict
 
 if __name__ == "__main__":
