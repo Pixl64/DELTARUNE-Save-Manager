@@ -14,20 +14,40 @@ class PartyMemberItems(LabelFrame):
     def __init__(self, parent, memberName:str, appConfig:dict, chapterLimits:dict, currentChapter:int, equippedItemData:dict, dragManager:DragManager):
         super().__init__(parent, text=memberName)
         
+        self.currentHPVar = StringVar(value=str(equippedItemData.get("currentHP", 0)))
+        self.maxHPVar = StringVar(value=str(equippedItemData.get("maxHP", 0)))
+
+        self.hpFrame = Frame(self)
+        Label(self.hpFrame, text="HP:").pack(side=LEFT)
+        Entry(self.hpFrame, textvariable=self.currentHPVar, width=3).pack(side=LEFT, padx=(4,0))
+        Label(self.hpFrame, text="/").pack(side=LEFT, padx=(2,2))
+        Entry(self.hpFrame, textvariable=self.maxHPVar, width=3).pack(side=LEFT)
+        self.hpFrame.pack(side=TOP, fill=X, padx=5, pady=(5,0))
+
         self.partyMemberListbox = DraggableListbox(self, dragManager, appConfig, chapterLimits, currentChapter, allowInternalSwap=True, appConfig=appConfig, height=3)
-        self.partyMemberListbox.pack(side=LEFT, fill=BOTH, expand=True, padx=(0,5), pady=5)
-        
+        self.partyMemberListbox.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
+
         # Insert items using IDs and tags
-        self.partyMemberListbox.insertWithId(END, equippedItemData["weapon"], "weapon")
-        self.partyMemberListbox.insertWithId(END, equippedItemData["armor1"], "armor")
-        self.partyMemberListbox.insertWithId(END, equippedItemData["armor2"], "armor")
+        self.partyMemberListbox.insertWithId(END, equippedItemData.get("weapon", 0), "weapon")
+        self.partyMemberListbox.insertWithId(END, equippedItemData.get("armor1", 0), "armor")
+        self.partyMemberListbox.insertWithId(END, equippedItemData.get("armor2", 0), "armor")
     
     def getListbox(self):
         return self.partyMemberListbox
     
     def getSelected(self):
         """Get the selected items by their IDs"""
+        try:
+            currentHP = int(self.currentHPVar.get().strip())
+        except (ValueError, AttributeError):
+            currentHP = 0
+        try:
+            maxHP = int(self.maxHPVar.get().strip())
+        except (ValueError, AttributeError):
+            maxHP = 0
         return {
+            "currentHP": currentHP,
+            "maxHP": maxHP,
             "weapon": self.partyMemberListbox.getItemId(0),
             "armor1": self.partyMemberListbox.getItemId(1),
             "armor2": self.partyMemberListbox.getItemId(2)
@@ -478,6 +498,13 @@ class SaveFileEdit(Dialog):
                     oldName = self._getItemName(oldId, itemType)
                     newName = self._getItemName(newId, itemType)
                     changes["Party Equipment Changes"].append(f"{character.capitalize()} {slotName}: \"{oldName}\" → \"{newName}\"")
+            # Check current and max HP changes
+            if original["party"][character].get("currentHP") != current["party"][character].get("currentHP"):
+                changes["Save Stat Changes"].append(
+                    f"{character.capitalize()} Current HP: \"{original['party'][character].get('currentHP')}\" → \"{current['party'][character].get('currentHP')}\"")
+            if original["party"][character].get("maxHP") != current["party"][character].get("maxHP"):
+                changes["Save Stat Changes"].append(
+                    f"{character.capitalize()} Max HP: \"{original['party'][character].get('maxHP')}\" → \"{current['party'][character].get('maxHP')}\"")
         
         # Check weapons inventory changes
         for i in range(min(len(original["weapons"]), len(current["weapons"]))):
@@ -531,7 +558,7 @@ class SaveFileEdit(Dialog):
                 "kris": self.krisItems.getSelected(),
                 "susie": self.susieItems.getSelected(),
                 "ralsei": self.ralseiItems.getSelected(),
-                "noelle": self.noelleItems.getSelected() if hasattr(self, 'noelleItems') else {"weapon": 0, "armor1": 0, "armor2": 0}
+                "noelle": self.noelleItems.getSelected() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
             },
             "items": self.itemsContainer.getSelected(),
             "keyItems": self.keyItemsContainer.getSelected(),
@@ -576,7 +603,7 @@ class SaveFileEdit(Dialog):
                 "kris": self.krisItems.getSelected(),
                 "susie": self.susieItems.getSelected(),
                 "ralsei": self.ralseiItems.getSelected(),
-                "noelle": self.noelleItems.getSelected() if hasattr(self, 'noelleItems') else {"weapon": 0, "armor1": 0, "armor2": 0}
+                "noelle": self.noelleItems.getSelected() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
             },
             "items": self.itemsContainer.getSelected(),
             "keyItems": self.keyItemsContainer.getSelected(),
@@ -592,10 +619,12 @@ class SaveFileEdit(Dialog):
         return
 
     def _read_character_equipment(self, fileList: list, character: str) -> dict:
-        """Helper method to read character equipment from save file."""
+        """Helper method to read character equipment and health from save file."""
         locData = self.chapterData["dw_partyMemberLocation"][character]
         base_idx = locData[0]
         return {
+            "currentHP": int(fileList[base_idx].strip()),
+            "maxHP": int(fileList[base_idx + 1].strip()),
             "weapon": int(fileList[base_idx + 6].strip()),
             "armor1": int(fileList[base_idx + 7].strip()),
             "armor2": int(fileList[base_idx + 8].strip())
@@ -612,12 +641,14 @@ class SaveFileEdit(Dialog):
                 return default
     
     def _write_character_equipment(self, fileList: list, character: str, equipment: dict):
-        """Helper method to write character equipment to save file."""
+        """Helper method to write character equipment and health to save file."""
         locData = self.chapterData["dw_partyMemberLocation"][character]
         base_idx = locData[0]
-        fileList[base_idx + 6] = f"{equipment['weapon']}\n"
-        fileList[base_idx + 7] = f"{equipment['armor1']}\n"
-        fileList[base_idx + 8] = f"{equipment['armor2']}\n"
+        fileList[base_idx] = f"{equipment.get('currentHP', 0)}\n"
+        fileList[base_idx + 1] = f"{equipment.get('maxHP', 0)}\n"
+        fileList[base_idx + 6] = f"{equipment.get('weapon', 0)}\n"
+        fileList[base_idx + 7] = f"{equipment.get('armor1', 0)}\n"
+        fileList[base_idx + 8] = f"{equipment.get('armor2', 0)}\n"
 
     def writeSaveFile(self):
         """
@@ -723,21 +754,29 @@ class SaveFileEdit(Dialog):
         resDict = {
             "party": {
                 "kris": {
+                    "currentHP": 0,
+                    "maxHP": 0,
                     "weapon": 0,
                     "armor1":0,
                     "armor2":0
                 },
                 "susie": {
+                    "currentHP": 0,
+                    "maxHP": 0,
                     "weapon": 0,
                     "armor1":0,
                     "armor2":0  
                 },
                 "ralsei": {
+                    "currentHP": 0,
+                    "maxHP": 0,
                     "weapon": 0,
                     "armor1":0,
                     "armor2":0
                 },
                 "noelle": {
+                    "currentHP": 0,
+                    "maxHP": 0,
                     "weapon": 0,
                     "armor1":0,
                     "armor2":0
