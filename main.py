@@ -1,8 +1,13 @@
-import os, sys, subprocess, ctypes, json, tempfile
+import ctypes
+import json
+import os
+import sys
+import tempfile
+from typing import Any, Dict
 
 # Get current running directory
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    dataPath = sys._MEIPASS
+    dataPath = sys._MEIPASS  # type: ignore
     runningDir = os.path.dirname(sys.executable)
     os.chdir(runningDir)
     # Import the pyi_splash module to close the splash screen
@@ -14,22 +19,21 @@ else:
     # Define a dummy function for killSplash if not running as a frozen executable
     def killSplash(): pass
 
-from tkinter import Tk, LabelFrame
-from tkinter.constants import *
+from tkinter import LabelFrame, Tk
+from tkinter.constants import BOTH, LEFT, NW, TOP, Y
 
-from tkinter.messagebox import showerror, showinfo
-from tkinter.messagebox import askyesno, askyesnocancel
+from tkinter.messagebox import askyesno, askyesnocancel, showerror, showinfo
 
-from widgets import ChapterSelectFrame, ActiveFrame, BackupFrame, RightButtonBox, setWindowIcon
-from popup import FirstTimeSetup, GameSelectPopup, SettingsPopup, BackupCreatePopup
-from filemanager import backupSave, restoreSave, copyFile
+from widgets import ActiveFrame, BackupFrame, ChapterSelectFrame, RightButtonBox, setWindowIcon
+from popup import BackupCreatePopup, FirstTimeSetup, GameSelectPopup, SettingsPopup
+from filemanager import backupSave, copyFile, restoreSave
 from invread import SaveFileEdit
 
 # Global variables
 os.environ["DSM_PATH"] = runningDir
 os.environ["DSM_DATA_PATH"] = dataPath
 
-def validateFiles():
+def validateFiles() -> bool:
     """ Validates the existence of the app_config.json and user_config.json files, and creates the user_config.json if it does not exist. """
     # Check for userconfig
     if not os.path.exists(os.path.join(os.environ["DSM_PATH"], "user_config.json")):
@@ -39,14 +43,14 @@ def validateFiles():
         print("Running first time setup...")
         data = FirstTimeSetup(tempW, title="Select Directory", initialDir=runningDir)
         if not data.result:
-            return
+            return False
         tempW.destroy()
         with open(os.path.join(os.environ["DSM_PATH"], "user_config.json"), "w") as f:
             json.dump(data.result, f, indent=4)
         
     return True
 
-def loadAppConfig():
+def loadAppConfig() -> Dict[str, Any]:
     """ Loads the app config from app_config.json """
     # Check if the app_config.json file exists next to the main file
     if os.path.exists(os.path.join(os.environ["DSM_PATH"], "app_config.json")):
@@ -65,13 +69,17 @@ def loadAppConfig():
                 
     return config
 
-def loadUserConfig():
+def loadUserConfig() -> Dict[str, Any]:
     """ Loads the user config from user_config.json and sets the environment variables """
     with open(os.path.join(os.environ["DSM_PATH"], "user_config.json")) as f:
         config = json.load(f)
     
     os.environ["DSM_BKP_PATH"] = config["backupSaveLocation"]
-    os.environ["DR_SAVE_PATH"] = os.path.join(os.getenv("LOCALAPPDATA"),"DELTARUNE") if config["activeSaveLocation"]["type"] == "default" else config["activeSaveLocation"]["path"]
+    localappdata = os.getenv("LOCALAPPDATA")
+    if config["activeSaveLocation"]["type"] == "default":
+        os.environ["DR_SAVE_PATH"] = os.path.join(localappdata if localappdata else "", "DELTARUNE")
+    else:
+        os.environ["DR_SAVE_PATH"] = config["activeSaveLocation"]["path"]
     if "launchData" not in config:
         os.environ["DR_EXE_PATH"] = "NOT_SET"
     else:
@@ -79,15 +87,17 @@ def loadUserConfig():
             os.environ["DR_EXE_PATH"] = "VIA_STEAM"
         if config["launchData"]["type"] == "custom":
             os.environ["DR_EXE_PATH"] = config["launchData"]["path"]
+    return config
 
-def setUpDirectories(appConfig:dict):
+
+def setUpDirectories(appConfig: Dict[str, Any]) -> None:
     """ Sets up the chapter directories in the backup path """
     for i in range(appConfig["maximumChapter"]):
         if not os.path.exists(os.path.join(os.environ["DSM_BKP_PATH"], f"CH{i+1}")):
             os.mkdir(os.path.join(os.environ["DSM_BKP_PATH"], f"CH{i+1}"))
 
 class App(Tk):
-    def __init__(self, userConfig, appConfig):
+    def __init__(self, userConfig: Dict[str, Any], appConfig: Dict[str, Any]) -> None:
         super().__init__()
         self.withdraw()  # Hide the main window until everything is set up
         self.title("DELTARUNE Save Manager")
@@ -106,7 +116,7 @@ class App(Tk):
         self.place_widgets()
         self.deiconify()
         
-    def place_widgets(self):
+    def place_widgets(self) -> None:
         self.saveInfoFrame = LabelFrame(self, text="Save Information", width=300, height=400)
         self.activeSaves = ActiveFrame(self.saveInfoFrame, self.appConfig)
         self.chapterSelectFrame = ChapterSelectFrame(self.saveInfoFrame, self.appConfig, listBoxUpdateCommand=self.chapterChange)
@@ -129,18 +139,18 @@ class App(Tk):
         self.saveInfoFrame.pack(side=LEFT, anchor=NW, padx=5, pady=5, fill=Y)
         self.buttonBox.pack(side=LEFT, anchor=NW, padx=5, pady=5, fill=BOTH, expand=True)
         
-    def set_window_middle(self, width:int, height:int):
+    def set_window_middle(self, width: int, height: int) -> None:
         user32 = ctypes.windll.user32
         screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
         middle = screensize[0] // 2, screensize[1] // 2
         add = middle[0] - width // 2, middle[1] - height // 2
         self.geometry(f"{width}x{height}+{add[0]}+{add[1]}")
     
-    def chapterChange(self, chapter):
+    def chapterChange(self, chapter: int) -> None:
         self.activeSaves.updateToChapter(chapter)
         self.backupSaves.setChapter(chapter)
 
-    def backupSaveCommand(self):
+    def backupSaveCommand(self) -> None:
         # Get the currently selected chapter
         currentSave = self.activeSaves.getSelectedSaveSlot()
         
@@ -169,7 +179,7 @@ class App(Tk):
         
         showinfo(title="Backup Complete", message=f"Backup of Chapter {currentSave['chapter']} Slot {currentSave['slot']+1} created successfully!")
 
-    def restoreSaveCommand(self):
+    def restoreSaveCommand(self) -> None:
         # Get currently selected backup save
         currentBackup = self.backupSaves.getSelectedSave()
         # Get currently selected save slot and chapter
@@ -202,7 +212,7 @@ class App(Tk):
 
         showinfo(title="Restore Complete", message=f"Backup '{currentBackup["selectedName"].replace(".drsave", "")}' restored to Chapter {currentSave['chapter']} Slot {currentSave['slot']+1} successfully!")
 
-    def showSettings(self):
+    def showSettings(self) -> None:
         settingsPopup = SettingsPopup(self, title="Settings", initialDir=os.environ["DSM_PATH"])
         if not settingsPopup.result:
             return
@@ -219,7 +229,7 @@ class App(Tk):
         setUpDirectories(self.appConfig)
         self.chapterChange(currentChapter)  # Update the chapter select frame
 
-    def launchGame(self):
+    def launchGame(self) -> None:
         if os.environ["DR_EXE_PATH"] == "NOT_SET":
             popup = GameSelectPopup(self, title="Select Game", initialDir="C:\\")
             if not popup.result:
@@ -248,7 +258,7 @@ class App(Tk):
             os.startfile(f'"{exe_path}"')
             os.chdir(os.environ["DSM_PATH"])
 
-    def editSave(self):
+    def editSave(self) -> None:
         # Get currently selected save slot and chapter
         currentSave = self.activeSaves.getSelectedSaveSlot()
         
@@ -261,9 +271,9 @@ class App(Tk):
             return
         
         
-        popup = SaveFileEdit(self, currentSave["chapter"], currentSave["slot"], self.appConfig["dw_invItems"], self.appConfig[f"chapter{currentSave['chapter']}"], self.appConfig, title=f"Editing save from Ch{currentSave['chapter']} slot {currentSave['slot']+1}")
+        SaveFileEdit(self, currentSave["chapter"], currentSave["slot"], self.appConfig["dw_invItems"], self.appConfig[f"chapter{currentSave['chapter']}"], self.appConfig, title=f"Editing save from Ch{currentSave['chapter']} slot {currentSave['slot']+1}")
         
-    def deleteSave(self):
+    def deleteSave(self) -> None:
         # Get currently selected backup save
         currentBackup = self.backupSaves.getSelectedSave()
         # Get currently selected save slot and chapter
@@ -311,7 +321,7 @@ class App(Tk):
             self.chapterChange(self.chapterSelectFrame.getChapter())  # Update all frames to the current chapter
             return
 
-    def exit(self):
+    def exit(self) -> None:
         print("Exiting app...")
         self.destroy()
         self.quit()
