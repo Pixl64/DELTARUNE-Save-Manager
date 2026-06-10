@@ -22,7 +22,7 @@ else:
 from tkinter import LabelFrame, Tk
 from tkinter.constants import BOTH, LEFT, NW, TOP, Y
 
-from tkinter.messagebox import askyesno, askyesnocancel, showerror, showinfo
+from tkinter.messagebox import askyesno, askyesnocancel, showerror, showinfo, showwarning
 
 from widgets import ActiveFrame, BackupFrame, ChapterSelectFrame, RightButtonBox, setWindowIcon
 from popup import BackupCreatePopup, FirstTimeSetup, GameSelectPopup, SettingsPopup
@@ -269,9 +269,25 @@ class App(Tk):
         if not currentSave["exists"]:
             showerror(title="Error", message="Selected save does not exist.")
             return
-        
-        
-        SaveFileEdit(self, currentSave["chapter"], currentSave["slot"], self.appConfig["dw_invItems"], self.appConfig[f"chapter{currentSave['chapter']}"], self.appConfig, title=f"Editing save from Ch{currentSave['chapter']} slot {currentSave['slot']+1}")
+
+        if not self.userConfig.get("hasSeenEditWarning", False):
+            showwarning(
+                title="Warning",
+                message="Editing save data can potentially break a save file. Please back up your save before continuing."
+            )
+            self.userConfig["hasSeenEditWarning"] = True
+            with open(os.path.join(os.environ["DSM_PATH"], "user_config.json"), "w", encoding="utf-8") as f:
+                json.dump(self.userConfig, f, indent=4)
+
+        SaveFileEdit(
+            self,
+            currentSave["chapter"],
+            currentSave["slot"],
+            self.appConfig["dw_invItems"],
+            self.appConfig[f"chapter{currentSave['chapter']}"],
+            self.appConfig,
+            title=f"Editing save from Ch{currentSave['chapter']} slot {currentSave['slot']+1}"
+        )
         
     def deleteSave(self) -> None:
         # Get currently selected backup save
