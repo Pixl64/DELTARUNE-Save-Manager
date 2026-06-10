@@ -14,8 +14,8 @@ args = {
     "name": "DSM_v0.1",
     # Max size: 760w 480h
     "splash": "splash2.png",
-    "onefile": None,
-    "clean": None,
+    "onefile": "",
+    "clean": "",
     #"specpath": specPath,
     "hide-console": "hide-early",
     "hidden-import": "pyi_splash",
@@ -36,9 +36,11 @@ for f in includedFiles:
 
 # Construct the command string, if a value is None, just put the key value
 # If a value is not None, put the key and value together
-runString = f"pyinstaller -i {iconName} {' '.join(f'--{k}' for k, v in args.items() if v is None)} --add-data \"INTERNAL:.\" {' '.join(f'--{k} {v}' for k, v in args.items() if v is not None)} {buildFileName}"
+runString = f"pyinstaller -i {iconName} {' '.join(f'--{k}' for k, v in args.items() if v == "")} --add-data \"INTERNAL:.\" {' '.join(f'--{k} {v}' for k, v in args.items() if v != "")} {buildFileName}"
 
 print(f"Running: {runString}")
+
+input()
 
 os.system(runString)
 # Move the generated executable to the main directory
@@ -50,7 +52,7 @@ if os.path.exists(distPath):
             if os.path.exists(newPath):
                 os.remove(newPath)
             os.rename(itemPath, newPath)
-            print(f"Moved executable to main directory")
+            print("Moved executable to main directory")
     # Remove the dist directory
     os.rmdir(distPath)
 else:
