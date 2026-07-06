@@ -77,6 +77,20 @@ class DraggableListbox(Listbox):
         """Determine which chapter an item was added in based on chapter limits from config"""
         item_id_int = int(itemId)
         typeKey = "item" if itemType == "items" else itemType
+
+        def _item_in_ranges(item_value: int, ranges) -> bool:
+            for item_range in ranges:
+                if not item_range:
+                    continue
+                if len(item_range) == 1:
+                    if item_value == item_range[0]:
+                        return True
+                    continue
+
+                start, end = sorted(item_range[:2])
+                if start <= item_value <= end:
+                    return True
+            return False
         
         # Get limits for this item type from all chapters
         chapter_limits = []
@@ -89,12 +103,12 @@ class DraggableListbox(Listbox):
         
         chapter_limits.sort()
         
-        # Find which chapter this item belongs to
-        for chapter_num, limit in chapter_limits:
-            if item_id_int <= limit:
+        # Find which chapter this item belongs to by checking explicit ID ranges
+        for chapter_num, limits in chapter_limits:
+            if _item_in_ranges(item_id_int, limits):
                 return chapter_num
         
-        # If item ID is higher than all limits, return the last chapter or default to 1
+        # If the item does not match any configured range, keep the existing fallback behavior
         return chapter_limits[-1][0] if chapter_limits else 1
     
     def _formatItemType(self, itemTag: str) -> str:

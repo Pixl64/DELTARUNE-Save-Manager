@@ -16,6 +16,7 @@ args = {
     "splash": "splash2.png",
     "onefile": "",
     "clean": "",
+    "windowed": "",
     #"specpath": specPath,
     "hide-console": "hide-early",
     "hidden-import": "pyi_splash",
@@ -39,8 +40,6 @@ for f in includedFiles:
 runString = f"pyinstaller -i {iconName} {' '.join(f'--{k}' for k, v in args.items() if v == "")} --add-data \"INTERNAL:.\" {' '.join(f'--{k} {v}' for k, v in args.items() if v != "")} {buildFileName}"
 
 print(f"Running: {runString}")
-
-input()
 
 os.system(runString)
 # Move the generated executable to the main directory

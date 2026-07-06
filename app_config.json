@@ -1,6 +1,6 @@
 {
     "defaultChapter": 1,
-    "maximumChapter": 4,
+    "maximumChapter": 5,
     "appID": 1671210,
     "colors": {
         "selectBackground": "#00c5ff",
@@ -50,10 +50,21 @@
             "37": "TVSlop",
             "38": "ExecBuffet",
             "39": "DeluxeDinner",
+            "40": "PunchBowl",
+            "41": "Flavigne",
+            "42": "GreenTea",
+            "43": "OrangeJuice",
             "60": "AncientSweet",
             "61": "Rhapsotea",
             "62": "Scarlixir",
-            "63": "BitterTear"
+            "63": "BitterTear",
+            "64": "Schadenbrot",
+            "65": "TreeCake",
+            "66": "S.POTION",
+            "67": "Raw Moon",
+            "68": "Phanta",
+            "69": "FlowerySoda",
+            "70": "Shikacola"
         },
         "keyItems": {
             "0": "---",
@@ -76,8 +87,11 @@
             "17": "BackstagePass",
             "18": "TripTicket",
             "19": "LancerCon",
+            "24": "BromideR",
+            "25": "PetalFeather",
             "30": "SheetMusic",
-            "31": "ClaimbClaws"
+            "31": "ClaimbClaws",
+            "32": "MysteryKey"
         },
         "weapons": {
             "0": "---",
@@ -107,6 +121,14 @@
             "24": "ToxicAxe",
             "25": "FlexScarf",
             "26": "BlackShard",
+            "30": "WoodBlade2",
+            "31": "Thatchet",
+            "32": "BlueShoes",
+            "33": "AquaKnife",
+            "34": "FloweryScarf",
+            "35": "BrokenScarf",
+            "36": "GildedRose",
+            "37": "MistleWP",
             "50": "JingleBlade",
             "51": "ScarfMark",
             "52": "JusticeAxe",
@@ -142,6 +164,15 @@
             "25": "GingerGuard",
             "26": "BlueRibbon",
             "27": "TennaTie",
+            "30": "MonarchRBN",
+            "31": "TrueTie",
+            "32": "DogWidow",
+            "33": "RedRibbon",
+            "34": "NetskieHat",
+            "35": "SethSpecs",
+            "36": "YellowHat",
+            "37": "O.Glove",
+            "38": "GreenApron",
             "50": "Waterguard",
             "51": "MysticBand",
             "52": "PowerBand",
@@ -181,10 +212,10 @@
             "storage": 0
         },
         "dw_invItemIdLimit": {
-            "item": 15,
-            "keyItem": 7,
-            "weapon": 10,
-            "armor": 7
+            "item": [[0, 15]],
+            "keyItem": [[0, 7]],
+            "weapon": [[0, 10]],
+            "armor": [[0, 7]]
         },
         "dw_darkDollarLine": 11,
         "dw_partyMemberLocation": {
@@ -228,10 +259,10 @@
             "storage": 24
         },
         "dw_invItemIdLimit": {
-            "item": 33,
-            "keyItem": 15,
-            "weapon": 22,
-            "armor": 22
+            "item": [[16, 33]],
+            "keyItem": [[8, 15]],
+            "weapon": [[10, 22]],
+            "armor": [[8,22]]
         },
         "dw_darkDollarLine": 11,
         "dw_partyMemberLocation": {
@@ -266,10 +297,10 @@
             "storage": 24
         },
         "dw_invItemIdLimit": {
-            "item": 39,
-            "keyItem": 19,
-            "weapon": 26,
-            "armor": 27
+            "item": [[34, 39]],
+            "keyItem": [[16, 19]],
+            "weapon": [[23, 26]],
+            "armor": [[23, 27]]
         },
         "dw_darkDollarLine": 11,
         "dw_pointsLine": 1597,
@@ -315,13 +346,45 @@
             "storage": 36
         },
         "dw_invItemIdLimit": {
-            "item": 63,
-            "keyItem": 31,
-            "weapon": 54,
-            "armor": 54
+            "item": [[60, 63]],
+            "keyItem": [[30, 31]],
+            "weapon": [[50, 54]],
+            "armor": [[50, 54]]
         },
         "dw_darkDollarLine": 11,
         "dw_pointsLine": 1597,
+        "dw_partyMemberLocation": {
+            "kris": [78, 87],
+            "susie": [140, 149],
+            "ralsei": [202, 211],
+            "noelle": [264, 273]
+        }
+    },
+    "chapter5": {
+        "roomNames" : {
+        },
+        "roomIDLineNumber": 3054,
+        "dw_invStart": 330,
+        "dw_invEnd": 451,
+        "dw_storageStart": 452,
+        "dw_storageEnd": 487,
+        "dw_invCount": {
+            "item": 12,
+            "keyItem": 12,
+            "weapon": 48,
+            "armor": 48,
+            "storage": 36
+        },
+        "dw_invItemIdLimit": {
+            "item": [[40, 43], [63, 70]],
+            "keyItem": [[24, 25], [32]],
+            "weapon": [[30, 37]],
+            "armor": [[30, 38]]
+        },
+        "dw_darkDollarLine": 11,
+        "dw_pointsLine": 1597,
+        "dw_floweryDollarsLine": 1964,
+        "dw_pinkCoinsLine": 1865,
         "dw_partyMemberLocation": {
             "kris": [78, 87],
             "susie": [140, 149],

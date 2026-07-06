@@ -406,9 +406,19 @@ class SaveFileEdit(Dialog):
         self.statsFrame = LabelFrame(self.mainFrame, text="Save Stats")
         self.darkDollarVar = StringVar(value=str(self.saveData.get("darkDollar", 0)))
         self.pointsVar = StringVar(value=str(self.saveData.get("points", 0)))
+        self.floweryDollarsVar = StringVar(value=str(self.saveData.get("floweryDollars", 0)))
+        self.pinkCoinsVar = StringVar(value=str(self.saveData.get("pinkCoins", 0)))
 
         Label(self.statsFrame, text="Dark Dollars:").pack(side=LEFT, padx=(5,2), pady=5)
         Entry(self.statsFrame, textvariable=self.darkDollarVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+
+        if "dw_floweryDollarsLine" in self.chapterData:
+            Label(self.statsFrame, text="Flowery Dollars:").pack(side=LEFT, padx=(5,2), pady=5)
+            Entry(self.statsFrame, textvariable=self.floweryDollarsVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+
+        if "dw_pinkCoinsLine" in self.chapterData:
+            Label(self.statsFrame, text="Pink Coins:").pack(side=LEFT, padx=(5,2), pady=5)
+            Entry(self.statsFrame, textvariable=self.pinkCoinsVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
 
         if "dw_pointsLine" in self.chapterData:
             Label(self.statsFrame, text="Points:").pack(side=LEFT, padx=(5,2), pady=5)
@@ -545,6 +555,14 @@ class SaveFileEdit(Dialog):
         if original.get("darkDollar") != current.get("darkDollar"):
             changes["Save Stat Changes"].append(f"Dark Dollars: \"{original.get('darkDollar')}\" → \"{current.get('darkDollar')}\"")
 
+        if original.get("floweryDollars") != current.get("floweryDollars"):
+            changes["Save Stat Changes"].append(
+                f"Flowery Dollars: \"{original.get('floweryDollars')}\" → \"{current.get('floweryDollars')}\"")
+
+        if original.get("pinkCoins") != current.get("pinkCoins"):
+            changes["Save Stat Changes"].append(
+                f"Pink Coins: \"{original.get('pinkCoins')}\" → \"{current.get('pinkCoins')}\"")
+
         if original.get("points") != current.get("points"):
             changes["Save Stat Changes"].append(f"Points: \"{original.get('points')}\" → \"{current.get('points')}\"")
         
@@ -566,6 +584,8 @@ class SaveFileEdit(Dialog):
             "armor": self.armorItems.getSelected(),
             "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
             "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
+            "floweryDollars": self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0)),
+            "pinkCoins": self._parse_int(self.pinkCoinsVar.get(), self.saveData.get("pinkCoins", 0)),
             "points": self._parse_int(self.pointsVar.get(), self.saveData.get("points", 0))
         }
         
@@ -611,6 +631,8 @@ class SaveFileEdit(Dialog):
             "armor": self.armorItems.getSelected(),
             "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
             "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
+            "floweryDollars": self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0)),
+            "pinkCoins": self._parse_int(self.pinkCoinsVar.get(), self.saveData.get("pinkCoins", 0)),
             "points": self._parse_int(self.pointsVar.get(), self.saveData.get("points", 0))
         }
         
@@ -722,6 +744,16 @@ class SaveFileEdit(Dialog):
             darkDollarIdx = self.chapterData["dw_darkDollarLine"] - 1
             if 0 <= darkDollarIdx < len(fileList):
                 fileList[darkDollarIdx] = f"{self.result['darkDollar']}\n"
+
+        if "dw_floweryDollarsLine" in self.chapterData:
+            floweryDollarsIdx = self.chapterData["dw_floweryDollarsLine"] - 1
+            if 0 <= floweryDollarsIdx < len(fileList):
+                fileList[floweryDollarsIdx] = f"{self.result.get('floweryDollars', 0)}\n"
+
+        if "dw_pinkCoinsLine" in self.chapterData:
+            pinkCoinsIdx = self.chapterData["dw_pinkCoinsLine"] - 1
+            if 0 <= pinkCoinsIdx < len(fileList):
+                fileList[pinkCoinsIdx] = f"{self.result.get('pinkCoins', 0)}\n"
 
         if "dw_pointsLine" in self.chapterData:
             pointsIdx = self.chapterData["dw_pointsLine"] - 1
@@ -864,6 +896,16 @@ class SaveFileEdit(Dialog):
             darkDollarIdx = self.chapterData["dw_darkDollarLine"] - 1
             if 0 <= darkDollarIdx < len(fileList):
                 resDict["darkDollar"] = int(fileList[darkDollarIdx].strip())
+
+        if "dw_floweryDollarsLine" in self.chapterData:
+            floweryDollarsIdx = self.chapterData["dw_floweryDollarsLine"] - 1
+            if 0 <= floweryDollarsIdx < len(fileList):
+                resDict["floweryDollars"] = int(fileList[floweryDollarsIdx].strip())
+
+        if "dw_pinkCoinsLine" in self.chapterData:
+            pinkCoinsIdx = self.chapterData["dw_pinkCoinsLine"] - 1
+            if 0 <= pinkCoinsIdx < len(fileList):
+                resDict["pinkCoins"] = int(fileList[pinkCoinsIdx].strip())
 
         if "dw_pointsLine" in self.chapterData:
             pointsIdx = self.chapterData["dw_pointsLine"] - 1
