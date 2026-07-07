@@ -87,11 +87,19 @@
             "17": "BackstagePass",
             "18": "TripTicket",
             "19": "LancerCon",
+            "20": "Scissors",
+            "21": "YellowShred",
+            "22": "BootOil",
+            "23": "RedSplatter",
             "24": "BromideR",
             "25": "PetalFeather",
+            "26": "PerpBook",
+            "27": "BlueString",
+            "28": "TrainPlan",
             "30": "SheetMusic",
             "31": "ClaimbClaws",
-            "32": "MysteryKey"
+            "32": "MysteryKey",
+            "33": "BromideF"
         },
         "weapons": {
             "0": "---",
@@ -377,7 +385,7 @@
         },
         "dw_invItemIdLimit": {
             "item": [[40, 43], [63, 70]],
-            "keyItem": [[24, 25], [32]],
+            "keyItem": [[20, 28], [32, 33]],
             "weapon": [[30, 37]],
             "armor": [[30, 38]]
         },
