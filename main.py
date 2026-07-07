@@ -69,9 +69,13 @@ def loadAppConfig() -> Dict[str, Any]:
     """ Loads the app config from app_config.json """
     config = loadJsonConfig("app_config.json")
     roomNames = loadJsonConfig("room_names.json")
+    inventoryItems = loadJsonConfig("inventory_items.json")
+    
     for chapterKey, chapterRooms in roomNames.items():
         if chapterKey in config:
             config[chapterKey]["roomNames"] = chapterRooms
+    
+    config["dw_invItems"] = inventoryItems
 
     return config
 

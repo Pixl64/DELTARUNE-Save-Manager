@@ -26,6 +26,7 @@ includedFiles = [
     iconName,
     "app_config.json",
     "room_names.json",
+    "inventory_items.json",
 ]
 
 # Copy included files to the INTERNAL directory
