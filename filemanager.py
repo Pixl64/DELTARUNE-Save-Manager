@@ -229,7 +229,7 @@ def _find_room_name(roomId: int, saveData: dict, chapter: int) -> str:
             if adjusted in saveData["roomNames"]:
                 return saveData["roomNames"][adjusted]
     
-    return "Unknown Room"
+    return f"Unknown Room {roomId}"
 
 def getActiveDisplayData(chapter:int, appconfig:dict) -> dict:
     drSavePath = os.environ["DR_SAVE_PATH"]
