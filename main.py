@@ -50,23 +50,29 @@ def validateFiles() -> bool:
         
     return True
 
+def loadJsonConfig(fileName: str) -> Dict[str, Any]:
+    """Loads a JSON config from the local directory or embedded data directory."""
+    localPath = os.path.join(os.environ["DSM_PATH"], fileName)
+    if os.path.exists(localPath):
+        with open(localPath) as f:
+            return json.load(f)
+
+    print(f"{fileName} not found locally. Using embedded config...")
+    with tempfile.TemporaryDirectory("DSM") as tempDir:
+        configSrc = os.path.join(os.environ["DSM_DATA_PATH"], fileName)
+        configTmp = os.path.join(tempDir, fileName)
+        copyFile(configSrc, configTmp)
+        with open(configTmp) as f:
+            return json.load(f)
+
 def loadAppConfig() -> Dict[str, Any]:
     """ Loads the app config from app_config.json """
-    # Check if the app_config.json file exists next to the main file
-    if os.path.exists(os.path.join(os.environ["DSM_PATH"], "app_config.json")):
-        print("App config found next to file. Launching using it...")
-        with open(os.path.join(os.environ["DSM_PATH"], "app_config.json")) as f:
-            config = json.load(f)
-    # If it does not exist, copy it from the data directory
-    else:
-        print("App config not found. Using embedded config...")
-        with tempfile.TemporaryDirectory("DSM") as tempDir:
-            configSrc = os.path.join(os.environ["DSM_DATA_PATH"], "app_config.json")
-            configTmp = os.path.join(tempDir, "app_config.json")
-            copyFile(configSrc, configTmp)
-            with open(configTmp) as f:
-                config = json.load(f)
-                
+    config = loadJsonConfig("app_config.json")
+    roomNames = loadJsonConfig("room_names.json")
+    for chapterKey, chapterRooms in roomNames.items():
+        if chapterKey in config:
+            config[chapterKey]["roomNames"] = chapterRooms
+
     return config
 
 def loadUserConfig() -> Dict[str, Any]:

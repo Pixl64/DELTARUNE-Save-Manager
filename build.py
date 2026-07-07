@@ -25,6 +25,7 @@ args = {
 includedFiles = [
     iconName,
     "app_config.json",
+    "room_names.json",
 ]
 
 # Copy included files to the INTERNAL directory

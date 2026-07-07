@@ -189,26 +189,6 @@
         }
     },
     "chapter1": {
-        "roomNames" : {
-            "10316": "?????? (Dark World Closet)",
-            "10321": "Eye Puzzle",
-            "10326": "Castle Town",
-            "10330": "Field - Great Door",
-            "10337": "Field - Maze of Death",
-            "10340": "Seam's Shop",
-            "10349": "Field - Great Board",
-            "10352": "Field - Great Board 2",
-            "10354": "Forest - Entrance",
-            "10363": "Forest - Bake Sale",
-            "10371": "Forest - Before Maze",
-            "10377": "Forest - After Maze",
-            "10378": "Forest - Thrashing Room",
-            "10388": "Card Castle - Prison",
-            "10392": "Card Castle - ??? (Basement)",
-            "10395": "Card Castle - 1F",
-            "10404": "Card Castle - 5F",
-            "10407": "Card Castle - Throne"
-        },
         "roomIDLineNumber": 10317,
         "dw_invStart": 236,
         "dw_invEnd": 283,
@@ -234,26 +214,6 @@
         }
     },
     "chapter2": {
-        "roomNames" : {
-            "20003": "Queen's Mansion - Rooftop",
-            "20071": "My Castle Town",
-            "20084": "Dark World",
-            "20087": "Cyber Field - Entrance",
-            "20091": "Cyber Field - Arcade Machine",
-            "20098": "Cyber Field - Music Shop",
-            "20121": "Cyber City - Entrance",
-            "20124": "Cyber City - First Alleyway",
-            "20130": "Cyber City - Music Shop",
-            "20135": "Cyber City - Mouse Alley",
-            "20137": "Cyber City - Second Alleyway",
-            "20142": "Cyber City - Heights",
-            "20161": "Queen's Mansion - Mess Hall",
-            "20166": "Queen's Mansion - Entrance",
-            "20180": "Queen's Mansion - Basement",
-            "20196": "Queen's Mansion - 3F",
-            "20202": "Queen's Mansion - Acid Tunnel",
-            "20205": "Queen's Mansion - 4F"
-        },
         "roomIDLineNumber": 3054,
         "dw_invStart": 330,
         "dw_invEnd": 451,
@@ -281,17 +241,6 @@
         }
     },
     "chapter3": {
-        "roomNames" : {
-            "30097": "Dark World",
-            "30108": "Cold Place",
-            "30134": "Green Room",
-            "30155": "Dark World?",
-            "30178": "TV World - Goulden Sam",
-            "30195": "TV World - Before the Show",
-            "30196": "TV World - Entrance",
-            "30209": "TV World - Concert",
-            "30214": "TV World - Cooking Show"
-        },
         "roomIDLineNumber": 3054,
         "dw_invStart": 330,
         "dw_invEnd": 451,
@@ -320,27 +269,6 @@
         }
     },
     "chapter4": {
-        "roomNames" : {
-            "40014": "Kris's Room",
-            "40023": "Hometown",
-            "40048": "Noelle's House",
-            "40064": "Castle Town",
-            "40065": "My Castle Town",
-            "40108": "Dark Sanctuary - Atrium",
-            "40115": "Dark Sanctuary - Study",
-            "40177": "Dark Sanctuary - Lower Left",
-            "40219": "Dark Sanctuary - Small Piano",
-            "40220": "Dark Sanctuary - Library",
-            "40228": "Dark Sanctuary - Lower Right",
-            "40248": "2nd Sanctuary - Atrium",
-            "40252": "2nd Sanctuary - Floor",
-            "40258": "2nd Sanctuary - Study",
-            "40271": "3rd Sanctuary",
-            "40278": "3rd Sanctuary - Stairs",
-            "40281": "3rd Sanctuary - Last Chamber",
-            "40306": "2nd Sanctuary - Study",
-            "40322": "MIKE ZONE"
-        },
         "roomIDLineNumber": 3054,
         "dw_invStart": 330,
         "dw_invEnd": 451,
@@ -369,8 +297,6 @@
         }
     },
     "chapter5": {
-        "roomNames" : {
-        },
         "roomIDLineNumber": 3054,
         "dw_invStart": 330,
         "dw_invEnd": 451,
