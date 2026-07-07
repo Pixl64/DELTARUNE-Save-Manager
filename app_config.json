@@ -121,13 +121,13 @@
         "dw_invStart": 330,
         "dw_invEnd": 451,
         "dw_storageStart": 452,
-        "dw_storageEnd": 487,
+        "dw_storageEnd": 499,
         "dw_invCount": {
             "item": 12,
             "keyItem": 12,
             "weapon": 48,
             "armor": 48,
-            "storage": 36
+            "storage": 48
         },
         "dw_invItemIdLimit": {
             "item": [[40, 43], [63, 70]],
