@@ -24,10 +24,10 @@ from tkinter.constants import BOTH, LEFT, NW, TOP, Y
 
 from tkinter.messagebox import askyesno, askyesnocancel, showerror, showinfo, showwarning
 
-from widgets import ActiveFrame, BackupFrame, ChapterSelectFrame, RightButtonBox, setWindowIcon
-from popup import BackupCreatePopup, FirstTimeSetup, GameSelectPopup, SettingsPopup
+from src.widgets import ActiveFrame, BackupFrame, ChapterSelectFrame, RightButtonBox, setWindowIcon
+from src.popup import BackupCreatePopup, FirstTimeSetup, GameSelectPopup, SettingsPopup
 from filemanager import backupSave, copyFile, restoreSave
-from invread import SaveFileEdit
+from src.invread import SaveFileEdit
 
 # Global variables
 os.environ["DSM_PATH"] = runningDir

@@ -7,7 +7,7 @@ from tkinter.constants import LEFT, NW, TOP
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
-from widgets import BackupSaveLocationSelectorFrame, ActiveSaveLocationSelectorFrame, GameSelectSelectorFrame, BackupFrame, setWindowIcon
+from src.widgets import BackupSaveLocationSelectorFrame, ActiveSaveLocationSelectorFrame, GameSelectSelectorFrame, BackupFrame, setWindowIcon
 
 class FirstTimeSetup(Dialog):
     def __init__(self, parent, title="", initialDir="."):

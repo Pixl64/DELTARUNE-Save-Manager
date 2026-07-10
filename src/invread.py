@@ -8,7 +8,7 @@ from tkinter.simpledialog import Dialog
 from tkinter.constants import END, LEFT, RIGHT, TOP, BOTTOM, X, BOTH, NW, N
 from tkinter.messagebox import askyesno
 
-from customlistbox import DragManager, DraggableListbox, DraggableScrollableListbox
+from src.customlistbox import DragManager, DraggableListbox, DraggableScrollableListbox
 
 class PartyMemberItems(LabelFrame):
     def __init__(self, parent, memberName:str, appConfig:dict, chapterLimits:dict, currentChapter:int, equippedItemData:dict, dragManager:DragManager):
