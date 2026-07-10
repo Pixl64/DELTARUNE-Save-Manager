@@ -96,7 +96,7 @@ class StorageContainer(LabelFrame):
         self.nextBtn.config(state="normal" if self.currentPage < self.page_count() - 1 else "disabled")
         
         # Re-highlight valid drop zones if we're currently dragging
-        if hasattr(self.dragManager, 'dragStartListbox') and self.dragManager.dragStartListbox is not None:
+        if hasattr(self.dragManager, 'dragStartListbox') and self.dragManager.drag.listbox is not None:
             self.dragManager._highlightValidDropZones()
 
     def _change_page(self, delta):
