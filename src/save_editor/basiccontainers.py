@@ -7,7 +7,15 @@ class BasicContainer(LabelFrame):
     def __init__(self, parent, title:str, appConfig:dict, chapterLimits:dict, currentChapter:int, itemData:list, itemType:str, dragManager:DragManager):
         super().__init__(parent, text=title)
         
-        self.itemListbox = DraggableListbox(self, dragManager, appConfig, chapterLimits, currentChapter, allowInternalSwap=True, appConfig=chapterLimits, height=10)
+        self.itemListbox = DraggableListbox(
+            self,
+            dragManager,
+            chapterLimits=chapterLimits,
+            currentChapter=currentChapter,
+            allowInternalSwap=True,
+            appConfig=appConfig,
+            height=10,
+        )
         self.itemListbox.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=5)
         
         # Insert items using IDs and tags
@@ -28,7 +36,15 @@ class LongItemContainer(LabelFrame):
     def __init__(self, parent, title:str, appConfig:dict, chapterLimits:dict, currentChapter:int, itemData:list, itemType:str, dragManager:DragManager):
         super().__init__(parent, text=title)
         
-        self.itemListbox = DraggableScrollableListbox(self, dragManager, appConfig, chapterLimits, currentChapter, allowInternalSwap=True, appConfig=chapterLimits, height=10)
+        self.itemListbox = DraggableScrollableListbox(
+            self,
+            dragManager,
+            chapterLimits=chapterLimits,
+            currentChapter=currentChapter,
+            allowInternalSwap=True,
+            appConfig=appConfig,
+            height=10,
+        )
         self.itemListbox.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=5)
         
         # Insert items using IDs and tags

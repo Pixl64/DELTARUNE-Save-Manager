@@ -47,10 +47,10 @@ class SaveFileEdit(Dialog):
 
         # Top: Party Frame (horizontal row of party members)
         self.partyFrame = Frame(self.mainFrame)
-        self.krisItems = PartyMember(self.partyFrame, "Kris", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["party"]["kris"], self.dragManager)
-        self.susieItems = PartyMember(self.partyFrame, "Susie", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["party"]["susie"], self.dragManager)
-        self.ralseiItems = PartyMember(self.partyFrame, "Ralsei", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["party"]["ralsei"], self.dragManager)
-        self.noelleItems = PartyMember(self.partyFrame, "Noelle", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["party"]["noelle"], self.dragManager)
+        self.krisItems = PartyMember(self.partyFrame, "Kris", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["kris"], self.dragManager)
+        self.susieItems = PartyMember(self.partyFrame, "Susie", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["susie"], self.dragManager)
+        self.ralseiItems = PartyMember(self.partyFrame, "Ralsei", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["ralsei"], self.dragManager)
+        self.noelleItems = PartyMember(self.partyFrame, "Noelle", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["noelle"], self.dragManager)
 
         self.krisItems.pack(side=LEFT, anchor=NW, padx=(5,0), pady=(0,5))
         self.susieItems.pack(side=LEFT, anchor=NW)
@@ -60,12 +60,12 @@ class SaveFileEdit(Dialog):
 
         # Row 2: Armor, Weapons, Key Items (side by side)
         self.row2Frame = Frame(self.mainFrame)
-        self.armorItems = LongItemContainer(self.row2Frame, "Armor", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["armor"], "armor", self.dragManager)
+        self.armorItems = LongItemContainer(self.row2Frame, "Armor", self.fullConfig, self.fullConfig, self.chapter, self.saveData["armor"], "armor", self.dragManager)
         self.armorItems.itemListbox.listbox.config(width=12)
-        self.weaponItems = LongItemContainer(self.row2Frame, "Weapons", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["weapons"], "weapon", self.dragManager)
+        self.weaponItems = LongItemContainer(self.row2Frame, "Weapons", self.fullConfig, self.fullConfig, self.chapter, self.saveData["weapons"], "weapon", self.dragManager)
         self.weaponItems.itemListbox.listbox.config(width=12)
         self.keyItemsContainer = BasicContainer(
-            self.row2Frame, "Key Items", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["keyItems"], "keyItem", self.dragManager
+            self.row2Frame, "Key Items", self.fullConfig, self.fullConfig, self.chapter, self.saveData["keyItems"], "keyItem", self.dragManager
         )
         self.keyItemsContainer.itemListbox.config(width=14, height=12)
 
@@ -101,9 +101,26 @@ class SaveFileEdit(Dialog):
         self.row3Frame = Frame(self.mainFrame)
         # Format Items inventory like Storage (grid with pages) but without View All button
         self.itemsContainer = StorageContainer(
-            self.row3Frame, "Items", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["items"], self.dragManager, showViewAll=False
+            self.row3Frame,
+            "Items",
+            self.fullConfig,
+            self.fullConfig,
+            self.chapter,
+            self.saveData["items"],
+            self.dragManager,
+            showViewAll=False,
+            appConfig=self.fullConfig,
         )
-        self.storageItems = StorageContainer(self.row3Frame, "Storage", self.dw_invItems, self.fullConfig, self.chapter, self.saveData["storage"], self.dragManager)
+        self.storageItems = StorageContainer(
+            self.row3Frame,
+            "Storage",
+            self.fullConfig,
+            self.fullConfig,
+            self.chapter,
+            self.saveData["storage"],
+            self.dragManager,
+            appConfig=self.fullConfig,
+        )
 
         # Layout changes based on chapter
         if self.chapter == 1:

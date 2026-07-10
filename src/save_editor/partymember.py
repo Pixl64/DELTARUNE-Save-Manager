@@ -17,7 +17,15 @@ class PartyMember(LabelFrame):
         Entry(self.hpFrame, textvariable=self.maxHPVar, width=3).pack(side=LEFT)
         self.hpFrame.pack(side=TOP, fill=X, padx=5, pady=(5,0))
 
-        self.partyMemberListbox = DraggableListbox(self, dragManager, appConfig, chapterLimits, currentChapter, allowInternalSwap=True, appConfig=appConfig, height=3)
+        self.partyMemberListbox = DraggableListbox(
+            self,
+            dragManager,
+            chapterLimits=chapterLimits,
+            currentChapter=currentChapter,
+            allowInternalSwap=True,
+            appConfig=appConfig,
+            height=3,
+        )
         self.partyMemberListbox.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
 
         # Insert items using IDs and tags

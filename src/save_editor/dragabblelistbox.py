@@ -15,29 +15,34 @@ from src.save_editor.dragmanager import DragManager
 class DraggableListbox(Listbox):
     """A Listbox with drag-and-drop functionality and context menu support."""
     
-    def __init__(self, parent:Widget, dragManager:'DragManager', dw_invItems=None, chapterLimits=None, currentChapter=1, allowInternalSwap=True, appConfig=None, **kwargs):
+    def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapterLimits=None, currentChapter=1, allowInternalSwap=True, **kwargs):
         # Set default selectbackground if not provided
         if 'selectbackground' not in kwargs:
             if appConfig and 'colors' in appConfig:
                 kwargs['selectbackground'] = appConfig['colors'].get('selectBackground', '#00c5ff')
             else:
                 kwargs['selectbackground'] = '#00c5ff'
+        appConfig = appConfig or {}
+        if "colors" not in appConfig:
+            
+            appConfig["colors"] = {}
+            appConfig["colors"]["selectBackground"] = "#00c5ff"
+        
         super().__init__(parent, selectmode=SINGLE, **kwargs)
         
         # Configuration
         self.dragManager = dragManager
-        self.dw_invItems = dw_invItems or {}
+        self.appConfig = appConfig or {}
+        self.dw_invItems = appConfig.get("dw_invItems", {}) if appConfig else {}
         self.chapterLimits = chapterLimits or {}
         self.currentChapter = currentChapter
         self.allowInternalSwap = allowInternalSwap
-        self.appConfig = appConfig or {}
         self.colors = appConfig.get('colors', {}) if appConfig else {}
         
         # Item tracking
         self.itemTags = {}  # Maps index to item tag (type)
         self.itemIds = {}   # Maps index to item ID
-        
-        # Visual state
+
         self.originalBg = self.cget("bg")  # Store original background color
         
         self.setupBindings()
@@ -226,13 +231,20 @@ class DraggableListbox(Listbox):
 class DraggableScrollableListbox(Frame):
     """A scrollable wrapper for DraggableListbox with vertical scrollbar."""
     
-    def __init__(self, parent, dragManager: 'DragManager', dw_invItems=None, chapterLimits=None, 
-                 currentChapter=1, allowInternalSwap=True, appConfig=None, **kwargs):
+    def __init__(self, parent, dragManager: DragManager, appConfig:dict, chapterLimits=None, 
+                 currentChapter=1, allowInternalSwap=True, **kwargs):
         super().__init__(parent)
         
         # Create listbox and scrollbar
-        self.listbox = DraggableListbox(self, dragManager, dw_invItems, chapterLimits, 
-                                      currentChapter, allowInternalSwap, appConfig, **kwargs)
+        self.listbox = DraggableListbox(
+            self,
+            dragManager,
+            appConfig,
+            chapterLimits=chapterLimits,
+            currentChapter=currentChapter,
+            allowInternalSwap=allowInternalSwap,
+            **kwargs,
+        )
         self.scrollbar = Scrollbar(self, orient=VERTICAL, command=self.listbox.yview)
         self.listbox.config(yscrollcommand=self.scrollbar.set)
         

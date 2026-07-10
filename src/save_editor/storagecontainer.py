@@ -4,7 +4,7 @@ from tkinter.constants import END, LEFT, RIGHT, TOP, BOTTOM, X, BOTH
 from src.save_editor.dragabblelistbox import DragManager, DraggableListbox
 
 class StorageContainer(LabelFrame):
-    def __init__(self, parent, title: str, dw_invItems: dict, chapterLimits: dict, currentChapter: int, storageData: list, dragManager: DragManager, itemsPerPage=12, showViewAll=True):
+    def __init__(self, parent, title: str, dw_invItems: dict, chapterLimits: dict, currentChapter: int, storageData: list, dragManager: DragManager, itemsPerPage=12, showViewAll=True, appConfig=None):
         super().__init__(parent, text=title)
         self.dw_invItems = dw_invItems  # Item data for context menus
         self.chapterLimits = chapterLimits
@@ -15,6 +15,7 @@ class StorageContainer(LabelFrame):
         self.currentPage = 0
         self.lastPageChange = 0  # Track last page change time to prevent rapid changes
         self.showViewAll = showViewAll  # Whether to show the View All button
+        self.appConfig = appConfig or chapterLimits
 
         self.rows = 6
         self.cols = 2
@@ -32,7 +33,16 @@ class StorageContainer(LabelFrame):
         for r in range(self.rows):
             row_listboxes = []
             for c in range(self.cols):
-                lb = DraggableListbox(self.gridFrame, self.dragManager, self.dw_invItems, self.chapterLimits, self.currentChapter, allowInternalSwap=True, appConfig=self.chapterLimits, height=1, width=18)
+                lb = DraggableListbox(
+                    self.gridFrame,
+                    self.dragManager,
+                    self.appConfig,
+                    chapterLimits=self.chapterLimits,
+                    currentChapter=self.currentChapter,
+                    allowInternalSwap=True,
+                    height=1,
+                    width=18,
+                )
                 lb.grid(row=r, column=c, padx=2, pady=1, sticky="ew")
                 row_listboxes.append(lb)
             self.listboxes.extend(row_listboxes)
@@ -175,9 +185,9 @@ class StorageContainer(LabelFrame):
                     lb = DraggableListbox(
                         page_frame, 
                         view_all_drag_manager, 
-                        self.dw_invItems, 
-                        self.chapterLimits, 
-                        self.currentChapter, 
+                        self.appConfig,
+                        chapterLimits=self.chapterLimits, 
+                        currentChapter=self.currentChapter, 
                         allowInternalSwap=True, 
                         height=1, 
                         width=18  # Same width as main storage
