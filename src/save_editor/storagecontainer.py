@@ -38,7 +38,7 @@ class StorageContainer(LabelFrame):
                     self.dragManager,
                     self.appConfig,
                     chapterLimits=self.chapterLimits,
-                    currentChapter=self.currentChapter,
+                    chapter=self.currentChapter,
                     allowInternalSwap=True,
                     height=1,
                     width=18,
@@ -187,7 +187,7 @@ class StorageContainer(LabelFrame):
                         view_all_drag_manager, 
                         self.appConfig,
                         chapterLimits=self.chapterLimits, 
-                        currentChapter=self.currentChapter, 
+                        chapter=self.currentChapter, 
                         allowInternalSwap=True, 
                         height=1, 
                         width=18  # Same width as main storage

@@ -11,7 +11,7 @@ class BasicContainer(LabelFrame):
             self,
             dragManager,
             chapterLimits=chapterLimits,
-            currentChapter=currentChapter,
+            chapter=currentChapter,
             allowInternalSwap=True,
             appConfig=appConfig,
             height=10,

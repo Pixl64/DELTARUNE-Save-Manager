@@ -15,7 +15,7 @@ from src.save_editor.dragmanager import DragManager
 class DraggableListbox(Listbox):
     """A Listbox with drag-and-drop functionality and context menu support."""
     
-    def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapterLimits=None, currentChapter=1, allowInternalSwap=True, **kwargs):
+    def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapterLimits=None, chapter=1, allowInternalSwap=True, **kwargs):
         if "colors" not in appConfig:
             appConfig["colors"] = {}
             appConfig["colors"]["selectBackground"] = "#00c5ff"
@@ -27,7 +27,7 @@ class DraggableListbox(Listbox):
         self.appConfig = appConfig or {}
         self.dw_invItems = appConfig.get("dw_invItems", {}) if appConfig else {}
         self.chapterLimits = chapterLimits or {}
-        self.currentChapter = currentChapter
+        self.chapter = chapter
         self.allowInternalSwap = allowInternalSwap
         self.colors = appConfig.get('colors', {}) if appConfig else {}
         
@@ -46,20 +46,20 @@ class DraggableListbox(Listbox):
         self.bind("<ButtonRelease-1>", self._onDrop) # Left mouse button release (Dropping listbox item)
         self.bind("<Enter>", self._onEnterListbox)   # Mouse enters listbox
         self.bind("<Leave>", self._onLeaveListbox)   # Mouse leaves listbox
-        self.bind("<Button-3>", self._onRightClick)  # Right mouse button press (Context menu)
+        self.bind("<Button-3>", self._replaceItemClickEvent)  # Right mouse button press (Context menu)
         
-    def _onRightClick(self, event) -> None:
-        """Handle right-click to show Windows Explorer-style context menu"""
-        index = self.nearest(event.y)
+    def _replaceItemClickEvent(self, event) -> None:
+        """Handle right-click event to show context menu for item replacement."""
+        index = self.nearest(event.y) # Get the index of the item under the mouse cursor
         
         if 0 <= index < self.size():
             # Highlight the right-clicked item
             self.selection_clear(0, END)
             self.selection_set(index)
             
+            # Get all items of this type
             itemTag = self.getItemTag(index)
             if itemTag:
-                # Get all items of this type
                 category = CATEGORY_MAP.get(itemTag, "items")
                 availableItems = self.dw_invItems.get(category, {})
                 
@@ -70,33 +70,32 @@ class DraggableListbox(Listbox):
                 self._showContextMenu(event, index, itemTag, availableItems)
     
     def _showContextMenu(self, event, index: int, itemTag: str, availableItems: dict) -> None:
-        """Show a Windows Explorer-style context menu"""
-        selectColor = self.colors.get('selectBackground', '#00c5ff')
+        """Show context menu for replacing an item with another of the same item type."""
+        selectColor = self.colors["selectBackground"]
         context_menu = Menu(self, tearoff=0, activebackground=selectColor, activeborderwidth=0)
 
         current_item_id = self.getItemId(index)
         current_name = get_item_name(self.dw_invItems, current_item_id, itemTag)
         context_menu.add_command(label=f"Current: {current_name} (ID: {current_item_id})",
-                                 state="disabled", foreground="gray")
+                                state="disabled", foreground="gray")
         context_menu.add_separator()
 
         replace_menu = Menu(context_menu, tearoff=0, activebackground=selectColor, activeborderwidth=0)
-        replace_menu.add_command(label="Clear Slot", command=lambda: self._replaceItem(index, 0))
+        replace_menu.add_command(label="Clear Slot", command=lambda: self.setItemId(index, 0))
         replace_menu.add_separator()
 
-        current_chapter = self._getCurrentChapter()
-        chapters = filter_and_group_items_by_chapter(availableItems, self.chapterLimits or {}, current_chapter, itemTag)
+        chapters = filter_and_group_items_by_chapter(availableItems, self.chapterLimits or {}, self.chapter, itemTag)
 
         multiple_chapters = len(chapters) > 1
         for chapter, chapter_items in chapters.items():
             if multiple_chapters:
                 chapter_menu = Menu(replace_menu, tearoff=0, activebackground=selectColor, activeborderwidth=0)
                 for itemId, itemName in chapter_items:
-                    chapter_menu.add_command(label=f"ID {itemId}: {itemName}", command=lambda id_val=itemId: self._replaceItem(index, id_val))
+                    chapter_menu.add_command(label=f"ID {itemId}: {itemName}", command=lambda id_val=itemId: self.setItemId(index, id_val))
                 replace_menu.add_cascade(label=f"Chapter {chapter}", menu=chapter_menu)
             else:
                 for itemId, itemName in chapter_items:
-                    replace_menu.add_command(label=f"ID {itemId}: {itemName}", command=lambda id_val=itemId: self._replaceItem(index, id_val))
+                    replace_menu.add_command(label=f"ID {itemId}: {itemName}", command=lambda id_val=itemId: self.setItemId(index, id_val))
 
         context_menu.add_cascade(label=f"Replace {format_item_type(itemTag)}...", menu=replace_menu)
         context_menu.add_separator()
@@ -106,25 +105,6 @@ class DraggableListbox(Listbox):
             context_menu.tk_popup(event.x_root, event.y_root)
         finally:
             context_menu.grab_release()
-    
-    def _getCurrentChapter(self) -> int:
-        """Get the current chapter number."""
-        if hasattr(self, 'currentChapter'):
-            return self.currentChapter
-        
-        if 'currentChapter' in self.chapterLimits:
-            return self.chapterLimits['currentChapter']
-        
-        # Fallback: find the highest chapter with limits defined
-        for chapter_num in range(7, 0, -1):
-            if f"chapter{chapter_num}" in self.chapterLimits:
-                return chapter_num
-        
-        return 1
-    
-    def _replaceItem(self, index: int, new_item_id: int) -> None:
-        """Replace the item at the given index with a new item ID"""
-        self.setItemId(index, new_item_id)
         
     def insertWithId(self, index: Union[int, str], itemId: int, tag: str) -> None:
         """Insert an item with an associated ID and tag, converting ID to display name"""
@@ -141,10 +121,6 @@ class DraggableListbox(Listbox):
         self.itemIds[actualIndex] = itemId
         self.itemTags[actualIndex] = tag
         self._updateIndices()
-    
-    def _getItemName(self, itemId: Optional[int], tag: str) -> str:
-        """Wrapper kept for backward compatibility; uses shared utils."""
-        return get_item_name(self.dw_invItems, itemId, tag)
     
     def deleteItem(self, index: int) -> None:
         """Delete an item and update internal tracking indices."""
@@ -233,7 +209,7 @@ class DraggableScrollableListbox(Frame):
             dragManager,
             appConfig,
             chapterLimits=chapterLimits,
-            currentChapter=currentChapter,
+            chapter=currentChapter,
             allowInternalSwap=allowInternalSwap,
             **kwargs,
         )
