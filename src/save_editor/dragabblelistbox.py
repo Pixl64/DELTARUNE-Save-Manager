@@ -16,15 +16,7 @@ class DraggableListbox(Listbox):
     """A Listbox with drag-and-drop functionality and context menu support."""
     
     def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapterLimits=None, currentChapter=1, allowInternalSwap=True, **kwargs):
-        # Set default selectbackground if not provided
-        if 'selectbackground' not in kwargs:
-            if appConfig and 'colors' in appConfig:
-                kwargs['selectbackground'] = appConfig['colors'].get('selectBackground', '#00c5ff')
-            else:
-                kwargs['selectbackground'] = '#00c5ff'
-        appConfig = appConfig or {}
         if "colors" not in appConfig:
-            
             appConfig["colors"] = {}
             appConfig["colors"]["selectBackground"] = "#00c5ff"
         
