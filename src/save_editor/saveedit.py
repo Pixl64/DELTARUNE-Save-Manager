@@ -12,8 +12,7 @@ from src.save_editor.basiccontainers import BasicContainer, LongItemContainer
 from src.save_editor.partymember import PartyMember
 
 from src.save_editor.inventory import Inventory
-
-from src.save_editor.storagecontainer import StorageContainer
+from src.save_editor.storage import Storage
 
 class SaveFileEdit(Dialog):
     def __init__(self, parent, chapter:int, slot:int, dw_invItems:dict, chapterData:dict, fullConfig:dict, title=""):
@@ -112,7 +111,7 @@ class SaveFileEdit(Dialog):
             self.saveData["items"],
             self.dragManager
         )
-        self.storageItems = StorageContainer(
+        self.storageItems = Storage(
             self.row3Frame,
             "Storage",
             self.fullConfig,
@@ -120,7 +119,6 @@ class SaveFileEdit(Dialog):
             self.chapter,
             self.saveData["storage"],
             self.dragManager,
-            appConfig=self.fullConfig,
         )
 
         # Layout changes based on chapter
@@ -271,7 +269,7 @@ class SaveFileEdit(Dialog):
             "keyItems": self.keyItemsContainer.getAllItems(),
             "weapons": self.weaponItems.getAllItems(),
             "armor": self.armorItems.getAllItems(),
-            "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
+            "storage": self.storageItems.getAllItems() if hasattr(self, 'storageItems') else [],
             "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
             "floweryDollars": self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0)),
             "pinkCoins": self._parse_int(self.pinkCoinsVar.get(), self.saveData.get("pinkCoins", 0)),
@@ -318,7 +316,7 @@ class SaveFileEdit(Dialog):
             "keyItems": self.keyItemsContainer.getAllItems(),
             "weapons": self.weaponItems.getAllItems(),
             "armor": self.armorItems.getAllItems(),
-            "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
+            "storage": self.storageItems.getAllItems() if hasattr(self, 'storageItems') else [],
             "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
             "floweryDollars": self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0)),
             "pinkCoins": self._parse_int(self.pinkCoinsVar.get(), self.saveData.get("pinkCoins", 0)),
