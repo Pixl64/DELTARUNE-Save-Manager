@@ -27,7 +27,7 @@ from tkinter.messagebox import askyesno, askyesnocancel, showerror, showinfo, sh
 from src.widgets import ActiveFrame, BackupFrame, ChapterSelectFrame, RightButtonBox, setWindowIcon
 from src.popup import BackupCreatePopup, FirstTimeSetup, GameSelectPopup, SettingsPopup
 from filemanager import backupSave, copyFile, restoreSave
-from src.invread import SaveFileEdit
+from src.save_editor.saveedit import SaveFileEdit
 
 # Global variables
 os.environ["DSM_PATH"] = runningDir
