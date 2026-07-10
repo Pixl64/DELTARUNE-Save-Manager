@@ -3,7 +3,7 @@ from typing import Optional, Union
 from tkinter import Widget, Frame, Listbox, Scrollbar, Menu
 from tkinter.constants import SINGLE, VERTICAL, LEFT, BOTH, RIGHT, Y, END
 import tkinter.messagebox as messagebox
-from src.save_editor.listbox_utils import (
+from src.save_editor.drag_utils import (
     CATEGORY_MAP,
     format_item_type,
     get_item_name,
