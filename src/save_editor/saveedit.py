@@ -10,6 +10,9 @@ from tkinter.messagebox import askyesno
 from src.save_editor.dragmanager import DragManager
 from src.save_editor.basiccontainers import BasicContainer, LongItemContainer
 from src.save_editor.partymember import PartyMember
+
+from src.save_editor.inventory import Inventory
+
 from src.save_editor.storagecontainer import StorageContainer
 
 class SaveFileEdit(Dialog):
@@ -100,16 +103,14 @@ class SaveFileEdit(Dialog):
         # Row 3: Items and Storage (side by side)
         self.row3Frame = Frame(self.mainFrame)
         # Format Items inventory like Storage (grid with pages) but without View All button
-        self.itemsContainer = StorageContainer(
+        self.itemsContainer = Inventory(
             self.row3Frame,
-            "Items",
+            "Inventory",
             self.fullConfig,
             self.fullConfig,
             self.chapter,
             self.saveData["items"],
-            self.dragManager,
-            showViewAll=False,
-            appConfig=self.fullConfig,
+            self.dragManager
         )
         self.storageItems = StorageContainer(
             self.row3Frame,

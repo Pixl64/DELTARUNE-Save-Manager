@@ -1,0 +1,40 @@
+from tkinter import LabelFrame
+from tkinter.constants import BOTH
+
+from src.save_editor.dragmanager import DragManager
+
+
+from src.save_editor.draggablegrid import DraggableGrid
+
+class Inventory(LabelFrame):
+    def __init__(self, parent, title: str, appconfig: dict, chapterLimits: dict, currentChapter: int, storageData: list, dragManager: DragManager):
+        super().__init__(parent, text=title)
+        self.parent = parent
+        self.appconfig = appconfig
+        self.chapterLimits = chapterLimits
+        self.currentChapter = currentChapter
+        self.storageData = storageData
+        self.dragManager = dragManager
+
+        # Create the DraggableGrid for the inventory items
+        self.draggableGrid = DraggableGrid(self, self.dragManager, self.appconfig, self.chapterLimits, self.currentChapter)
+        self.draggableGrid.pack(fill=BOTH, expand=True)
+        
+        self.updateInventory(self.storageData)  # Populate the grid with initial storage data
+        
+    def updateInventory(self, newStorageData: list):
+        """Update the inventory with new storage data."""
+        self.storageData = newStorageData
+        self.draggableGrid.populate_grid(self.storageData, "item")
+        
+    def getListboxes(self):
+        """Return the list of DraggableListbox instances in the grid."""
+        return self.draggableGrid.listboxes
+    
+    def getAllItems(self):
+        """Get the selected items from all listboxes in the grid."""
+        all_items = []
+        for lb in self.draggableGrid.listboxes:
+            for i in range(lb.size()):
+                all_items.append(lb.getItemId(i))
+        return all_items
