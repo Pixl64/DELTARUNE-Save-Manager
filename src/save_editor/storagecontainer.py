@@ -1,7 +1,7 @@
 from tkinter import Toplevel, Frame, LabelFrame, Label, Button
 from tkinter.constants import END, LEFT, RIGHT, TOP, BOTTOM, X, BOTH
 
-from src.save_editor.dragabblelistbox import DragManager, DraggableListbox
+from src.save_editor.draggabblelistbox import DragManager, DraggableListbox
 
 class StorageContainer(LabelFrame):
     def __init__(self, parent, title: str, dw_invItems: dict, chapterLimits: dict, currentChapter: int, storageData: list, dragManager: DragManager, itemsPerPage=12, showViewAll=True, appConfig=None):
