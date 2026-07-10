@@ -67,9 +67,9 @@ def loadJsonConfig(fileName: str) -> Dict[str, Any]:
 
 def loadAppConfig() -> Dict[str, Any]:
     """ Loads the app config from app_config.json """
-    config = loadJsonConfig("app_config.json")
-    roomNames = loadJsonConfig("room_names.json")
-    inventoryItems = loadJsonConfig("inventory_items.json")
+    config = loadJsonConfig("cfg_app.json")
+    roomNames = loadJsonConfig("cfg_room_names.json")
+    inventoryItems = loadJsonConfig("cfg_inventory_items.json")
     
     # Merge default config into chapters
     default = config.pop("default", {})
