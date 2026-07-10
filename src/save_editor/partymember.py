@@ -1,7 +1,7 @@
 from tkinter import Frame, LabelFrame, Label, Entry, StringVar
 from tkinter.constants import END, LEFT, TOP, X, BOTH
 
-from src.customlistbox import DragManager, DraggableListbox
+from src.save_editor.dragabblelistbox import DragManager, DraggableListbox
 
 class PartyMember(LabelFrame):
     def __init__(self, parent, memberName:str, appConfig:dict, chapterLimits:dict, currentChapter:int, equippedItemData:dict, dragManager:DragManager):

@@ -1,7 +1,7 @@
 from tkinter import LabelFrame
 from tkinter.constants import END, LEFT, BOTH
 
-from src.customlistbox import DragManager, DraggableListbox, DraggableScrollableListbox
+from src.save_editor.dragabblelistbox import DragManager, DraggableListbox, DraggableScrollableListbox
 
 class BasicContainer(LabelFrame):
     def __init__(self, parent, title:str, appConfig:dict, chapterLimits:dict, currentChapter:int, itemData:list, itemType:str, dragManager:DragManager):

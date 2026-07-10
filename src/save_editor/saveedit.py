@@ -7,7 +7,7 @@ from tkinter.simpledialog import Dialog
 from tkinter.constants import LEFT, TOP, X, BOTH, NW, N
 from tkinter.messagebox import askyesno
 
-from src.customlistbox import DragManager
+from src.save_editor.dragmanager import DragManager
 from src.save_editor.basiccontainers import BasicContainer, LongItemContainer
 from src.save_editor.partymember import PartyMember
 from src.save_editor.storagecontainer import StorageContainer
