@@ -146,7 +146,7 @@ class DraggableListbox(Listbox):
         """Get the ID for an item at the given index"""
         return self.itemIds.get(index, None)
     
-    def setItemTag(self, index: int, tag: str) -> None:
+    def setItemTag(self, index: int, tag: Optional[str]) -> None:
         """Set the tag for an item at the given index"""
         self.itemTags[index] = tag
         
