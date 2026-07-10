@@ -261,15 +261,15 @@ class SaveFileEdit(Dialog):
         # Collect current data from UI
         currentData = {
             "party": {
-                "kris": self.krisItems.getSelected(),
-                "susie": self.susieItems.getSelected(),
-                "ralsei": self.ralseiItems.getSelected(),
-                "noelle": self.noelleItems.getSelected() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
+                "kris": self.krisItems.getAllItems(),
+                "susie": self.susieItems.getAllItems(),
+                "ralsei": self.ralseiItems.getAllItems(),
+                "noelle": self.noelleItems.getAllItems() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
             },
-            "items": self.itemsContainer.getSelected(),
-            "keyItems": self.keyItemsContainer.getSelected(),
-            "weapons": self.weaponItems.getSelected(),
-            "armor": self.armorItems.getSelected(),
+            "items": self.itemsContainer.getAllItems(),
+            "keyItems": self.keyItemsContainer.getAllItems(),
+            "weapons": self.weaponItems.getAllItems(),
+            "armor": self.armorItems.getAllItems(),
             "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
             "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
             "floweryDollars": self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0)),
@@ -308,15 +308,15 @@ class SaveFileEdit(Dialog):
         # Collect all data from the UI components
         self.result = {
             "party": {
-                "kris": self.krisItems.getSelected(),
-                "susie": self.susieItems.getSelected(),
-                "ralsei": self.ralseiItems.getSelected(),
-                "noelle": self.noelleItems.getSelected() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
+                "kris": self.krisItems.getAllItems(),
+                "susie": self.susieItems.getAllItems(),
+                "ralsei": self.ralseiItems.getAllItems(),
+                "noelle": self.noelleItems.getAllItems() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
             },
-            "items": self.itemsContainer.getSelected(),
-            "keyItems": self.keyItemsContainer.getSelected(),
-            "weapons": self.weaponItems.getSelected(),
-            "armor": self.armorItems.getSelected(),
+            "items": self.itemsContainer.getAllItems(),
+            "keyItems": self.keyItemsContainer.getAllItems(),
+            "weapons": self.weaponItems.getAllItems(),
+            "armor": self.armorItems.getAllItems(),
             "storage": self.storageItems.getSelected() if hasattr(self, 'storageItems') else [],
             "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
             "floweryDollars": self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0)),

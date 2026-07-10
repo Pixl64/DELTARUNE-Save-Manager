@@ -25,7 +25,7 @@ class BasicContainer(LabelFrame):
     def getListbox(self):
         return self.itemListbox  # Return the actual listbox, not the container
     
-    def getSelected(self):
+    def getAllItems(self):
         """Get all items by their IDs"""
         items = []
         for i in range(self.itemListbox.size()):
@@ -54,7 +54,7 @@ class LongItemContainer(LabelFrame):
     def getListbox(self):
         return self.itemListbox.getListbox()  # Return the actual listbox, not the container
     
-    def getSelected(self):
+    def getAllItems(self):
         """Get all items by their IDs"""
         items = []
         for i in range(self.itemListbox.listbox.size()):

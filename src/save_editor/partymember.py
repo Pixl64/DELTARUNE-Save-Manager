@@ -36,7 +36,7 @@ class PartyMember(LabelFrame):
     def getListbox(self):
         return self.partyMemberListbox
     
-    def getSelected(self):
+    def getAllItems(self):
         """Get the selected items by their IDs"""
         try:
             currentHP = int(self.currentHPVar.get().strip())
