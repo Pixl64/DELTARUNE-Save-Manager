@@ -1,12 +1,12 @@
 from tkinter import Button, Frame, Label, Toplevel
 from tkinter.constants import LEFT, RIGHT, X, BOTTOM
 
-from src.save_editor.inventory import Inventory
-from src.save_editor.dragmanager import DragManager
+from src.save_editor.basic_containers.inventory import Inventory
+from src.save_editor.drag.dragmanager import DragManager
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from src.save_editor.storage import Storage  # Import Storage for type hinting only
+    from src.save_editor.basic_containers.storage import Storage  # Import Storage for type hinting only
 
 def _open_view_all_window(parent:Storage, storageData, appConfig, chapterLimits, currentChapter):
     """Open a window showing all storage items for easy management"""

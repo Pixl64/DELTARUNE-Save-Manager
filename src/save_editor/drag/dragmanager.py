@@ -4,7 +4,7 @@ from tkinter.constants import END
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.save_editor.draggabblelistbox import DraggableListbox
+    from src.save_editor.drag.draggabblelistbox import DraggableListbox
 
 
 @dataclass(slots=True)
@@ -275,7 +275,7 @@ class DragManager:
 
     def _findActualListbox(self, widget) -> Optional[DraggableListbox]:
         """Find the actual listbox widget (handles scrollable containers)"""
-        from src.save_editor.draggabblelistbox import DraggableListbox
+        from src.save_editor.drag.draggabblelistbox import DraggableListbox
 
         # If it's a DraggableListbox, return it
         if isinstance(widget, DraggableListbox):

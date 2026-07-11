@@ -2,10 +2,10 @@ import time
 from tkinter import LabelFrame, Frame, Label
 from tkinter.constants import BOTH, LEFT, RIGHT, X, BOTTOM
 
-from src.save_editor.dragmanager import DragManager
+from src.save_editor.drag.dragmanager import DragManager
 
-from src.save_editor.draggablegrid import DraggableGrid
-from src.save_editor.storage_viewall import _open_view_all_window
+from src.save_editor.drag.draggablegrid import DraggableGrid
+from src.save_editor.basic_containers.storage_viewall import _open_view_all_window
 
 class Storage(LabelFrame):
     def __init__(self, parent, title: str, appconfig: dict, chapterLimits: dict, currentChapter: int, storageData: list, dragManager: DragManager):

@@ -3,14 +3,14 @@ from typing import Optional, Union
 from tkinter import Widget, Frame, Listbox, Scrollbar, Menu
 from tkinter.constants import SINGLE, VERTICAL, LEFT, BOTH, RIGHT, Y, END
 import tkinter.messagebox as messagebox
-from src.save_editor.drag_utils import (
+from src.save_editor.drag.drag_utils import (
     CATEGORY_MAP,
     format_item_type,
     get_item_name,
     filter_and_group_items_by_chapter,
 )
 
-from src.save_editor.dragmanager import DragManager
+from src.save_editor.drag.dragmanager import DragManager
 
 class DraggableListbox(Listbox):
     """A Listbox with drag-and-drop functionality and context menu support."""

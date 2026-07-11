@@ -1,8 +1,8 @@
 from tkinter import END, Widget, Frame
 import tkinter.messagebox as messagebox
 
-from src.save_editor.dragmanager import DragManager
-from src.save_editor.draggabblelistbox import DraggableListbox
+from src.save_editor.drag.dragmanager import DragManager
+from src.save_editor.drag.draggabblelistbox import DraggableListbox
 
 class DraggableGrid(Frame):
     """A grid of draggable items with context menu support."""

@@ -1,10 +1,10 @@
 from tkinter import LabelFrame
 from tkinter.constants import BOTH
 
-from src.save_editor.dragmanager import DragManager
+from src.save_editor.drag.dragmanager import DragManager
 
 
-from src.save_editor.draggablegrid import DraggableGrid
+from src.save_editor.drag.draggablegrid import DraggableGrid
 
 class Inventory(LabelFrame):
     def __init__(self, parent, title: str, appconfig: dict, chapterLimits: dict, currentChapter: int, inventoryData: list, dragManager: DragManager):

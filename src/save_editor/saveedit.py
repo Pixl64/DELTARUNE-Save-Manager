@@ -7,12 +7,12 @@ from tkinter.simpledialog import Dialog
 from tkinter.constants import LEFT, TOP, X, BOTH, NW, N
 from tkinter.messagebox import askyesno
 
-from src.save_editor.dragmanager import DragManager
-from src.save_editor.basiccontainers import BasicContainer, LongItemContainer
-from src.save_editor.partymember import PartyMember
+from src.save_editor.drag.dragmanager import DragManager
+from src.save_editor.basic_containers.basiccontainers import BasicContainer, LongItemContainer
+from src.save_editor.basic_containers.partymember import PartyMember
 
-from src.save_editor.inventory import Inventory
-from src.save_editor.storage import Storage
+from src.save_editor.basic_containers.inventory import Inventory
+from src.save_editor.basic_containers.storage import Storage
 
 class SaveFileEdit(Dialog):
     def __init__(self, parent, chapter:int, slot:int, dw_invItems:dict, chapterData:dict, fullConfig:dict, title=""):
