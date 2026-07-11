@@ -1,0 +1,116 @@
+{
+    "default": {
+        "roomIDLineNumber": 3054,
+        "dw_invStart": 330,
+        "dw_invEnd": 451,
+        "dw_storageStart": 452,
+        "dw_invCount": {
+            "item": 12,
+            "keyItem": 12,
+            "weapon": 48,
+            "armor": 48,
+            "storage": 24
+        },
+        "dw_darkDollarLine": 11,
+        "dw_partyMemberLocation": {
+            "kris": [78, 87],
+            "susie": [140, 149],
+            "ralsei": [202, 211],
+            "noelle": [264, 273]
+        }
+    },
+    "chapter1": {
+        "roomIDLineNumber": 10317,
+        "dw_invStart": 236,
+        "dw_invEnd": 283,
+        "dw_invCount": {
+            "item": 12,
+            "keyItem": 12,
+            "weapon": 12,
+            "armor": 12,
+            "storage": 0
+        },
+        "dw_invItemIdLimit": {
+            "item": [[0, 15]],
+            "keyItem": [[0, 7]],
+            "weapon": [[0, 10]],
+            "armor": [[0, 7]]
+        },
+        "dw_darkDollarLine": 11,
+        "dw_partyMemberLocation": {
+            "kris": [70, 79],
+            "susie": [124, 133],
+            "ralsei": [178, 187],
+            "noelle": [-1, -1]
+        }
+    },
+    "chapter2": {
+        "dw_storageEnd": 475,
+        "dw_invCount": {
+            "item": 12,
+            "keyItem": 12,
+            "weapon": 48,
+            "armor": 48,
+            "storage": 24
+        },
+        "dw_invItemIdLimit": {
+            "item": [[16, 33]],
+            "keyItem": [[8, 15]],
+            "weapon": [[10, 22]],
+            "armor": [[8, 22]]
+        }
+    },
+    "chapter3": {
+        "dw_storageEnd": 475,
+        "dw_invCount": {
+            "item": 12,
+            "keyItem": 12,
+            "weapon": 48,
+            "armor": 48,
+            "storage": 24
+        },
+        "dw_invItemIdLimit": {
+            "item": [[34, 39]],
+            "keyItem": [[16, 19]],
+            "weapon": [[23, 26]],
+            "armor": [[23, 27]]
+        },
+        "dw_pointsLine": 1597
+    },
+    "chapter4": {
+        "dw_storageEnd": 487,
+        "dw_invCount": {
+            "item": 12,
+            "keyItem": 12,
+            "weapon": 48,
+            "armor": 48,
+            "storage": 36
+        },
+        "dw_invItemIdLimit": {
+            "item": [[60, 63]],
+            "keyItem": [[30, 31]],
+            "weapon": [[50, 54]],
+            "armor": [[50, 54]]
+        },
+        "dw_pointsLine": 1597
+    },
+    "chapter5": {
+        "dw_storageEnd": 499,
+        "dw_invCount": {
+            "item": 12,
+            "keyItem": 12,
+            "weapon": 48,
+            "armor": 48,
+            "storage": 48
+        },
+        "dw_invItemIdLimit": {
+            "item": [[40, 43], [63, 70]],
+            "keyItem": [[20, 28], [32, 33]],
+            "weapon": [[30, 37]],
+            "armor": [[30, 38]]
+        },
+        "dw_pointsLine": 1597,
+        "dw_floweryDollarsLine": 1964,
+        "dw_pinkCoinsLine": 1865
+    }
+}

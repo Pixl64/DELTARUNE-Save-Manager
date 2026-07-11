@@ -66,17 +66,25 @@ def loadJsonConfig(fileName: str) -> Dict[str, Any]:
             return json.load(f)
 
 def loadAppConfig() -> Dict[str, Any]:
-    """ Loads the app config from app_config.json """
+    """Loads the application configuration."""
+
     config = loadJsonConfig("cfg_app.json")
+    chapterConfig = loadJsonConfig("cfg_chapter.json")
     roomNames = loadJsonConfig("cfg_room_names.json")
     inventoryItems = loadJsonConfig("cfg_inventory_items.json")
     
     # Merge default config into chapters
-    default = config.pop("default", {})
-    for chapterKey in ["chapter1", "chapter2", "chapter3", "chapter4", "chapter5"]:
+    defaultConfig = chapterConfig.pop("default", {})
+    for chapterKey, chapterOverrides in chapterConfig.items():
+        mergedConfig = {**defaultConfig, **chapterOverrides}
+
+        # Preserve any existing app-specific values
         if chapterKey in config:
-            # Create merged config with defaults first, then chapter overrides
-            mergedConfig = {**default, **config[chapterKey]}
+            config[chapterKey] = {
+                **config[chapterKey],
+                **mergedConfig,
+            }
+        else:
             config[chapterKey] = mergedConfig
     
     for chapterKey, chapterRooms in roomNames.items():
