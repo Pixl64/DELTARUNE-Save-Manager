@@ -8,6 +8,7 @@ from tkinter.constants import LEFT, TOP, X, BOTH, NW, N
 from tkinter.messagebox import askyesno
 
 from src.save_editor.drag.dragmanager import DragManager
+from src.save_editor.drag.drag_utils import get_item_name
 from src.save_editor.basic_containers.basiccontainers import BasicContainer, LongItemContainer
 from src.save_editor.basic_containers.partymember import PartyMember
 
@@ -152,19 +153,6 @@ class SaveFileEdit(Dialog):
             for lb in self.storageItems.getListboxes():
                 self.dragManager.registerListbox(lb)
     
-    def _getItemName(self, itemId, itemType):
-        """Get the display name for an item ID and type."""
-        # Map itemType to category in dw_invItems
-        categoryMap = {
-            "weapon": "weapons",
-            "armor": "armor",
-            "item": "items",
-            "keyItem": "keyItems"
-        }
-        category = categoryMap.get(itemType, "items")
-        itemDict = self.dw_invItems.get(category, {})
-        return itemDict.get(str(itemId), f"Unknown {itemType} ({itemId})")
-    
     def _generateCategorizedChangeReport(self, original, current):
         """Generate a categorized dictionary of changes between original and current data."""
         changes = {
@@ -183,8 +171,8 @@ class SaveFileEdit(Dialog):
                 if oldId != newId:
                     slotName = "Weapon" if slot == "weapon" else ("Armor 1" if slot == "armor1" else "Armor 2")
                     itemType = "weapon" if slot == "weapon" else "armor"
-                    oldName = self._getItemName(oldId, itemType)
-                    newName = self._getItemName(newId, itemType)
+                    oldName = get_item_name(self.dw_invItems, oldId, itemType)
+                    newName = get_item_name(self.dw_invItems, newId, itemType)
                     changes["Party Equipment Changes"].append(f"{character.capitalize()} {slotName}: \"{oldName}\" → \"{newName}\"")
             # Check current and max HP changes
             if original["party"][character].get("currentHP") != current["party"][character].get("currentHP"):
@@ -197,37 +185,37 @@ class SaveFileEdit(Dialog):
         # Check weapons inventory changes
         for i in range(min(len(original["weapons"]), len(current["weapons"]))):
             if original["weapons"][i] != current["weapons"][i]:
-                oldName = self._getItemName(original["weapons"][i], "weapon")
-                newName = self._getItemName(current["weapons"][i], "weapon")
+                oldName = get_item_name(self.dw_invItems, original["weapons"][i], "weapon")
+                newName = get_item_name(self.dw_invItems, current["weapons"][i], "weapon")
                 changes["Weapon & Armor Inventory Changes"].append(f"Weapon Slot {i+1}: \"{oldName}\" → \"{newName}\"")
         
         # Check armor inventory changes
         for i in range(min(len(original["armor"]), len(current["armor"]))):
             if original["armor"][i] != current["armor"][i]:
-                oldName = self._getItemName(original["armor"][i], "armor")
-                newName = self._getItemName(current["armor"][i], "armor")
+                oldName = get_item_name(self.dw_invItems, original["armor"][i], "armor")
+                newName = get_item_name(self.dw_invItems, current["armor"][i], "armor")
                 changes["Weapon & Armor Inventory Changes"].append(f"Armor Slot {i+1}: \"{oldName}\" → \"{newName}\"")
         
         # Check key items changes
         for i in range(min(len(original["keyItems"]), len(current["keyItems"]))):
             if original["keyItems"][i] != current["keyItems"][i]:
-                oldName = self._getItemName(original["keyItems"][i], "keyItem")
-                newName = self._getItemName(current["keyItems"][i], "keyItem")
+                oldName = get_item_name(self.dw_invItems, original["keyItems"][i], "keyItem")
+                newName = get_item_name(self.dw_invItems, current["keyItems"][i], "keyItem")
                 changes["Key Item Changes"].append(f"Slot {i+1}: \"{oldName}\" → \"{newName}\"")
         
         # Check items inventory changes
         for i in range(min(len(original["items"]), len(current["items"]))):
             if original["items"][i] != current["items"][i]:
-                oldName = self._getItemName(original["items"][i], "item")
-                newName = self._getItemName(current["items"][i], "item")
+                oldName = get_item_name(self.dw_invItems, original["items"][i], "item")
+                newName = get_item_name(self.dw_invItems, current["items"][i], "item")
                 changes["Item & Storage Changes"].append(f"Item Slot {i+1}: \"{oldName}\" → \"{newName}\"")
         
         # Check storage changes (if applicable)
         if "storage" in original and "storage" in current:
             for i in range(min(len(original["storage"]), len(current["storage"]))):
                 if original["storage"][i] != current["storage"][i]:
-                    oldName = self._getItemName(original["storage"][i], "item")
-                    newName = self._getItemName(current["storage"][i], "item")
+                    oldName = get_item_name(self.dw_invItems, original["storage"][i], "item")
+                    newName = get_item_name(self.dw_invItems, current["storage"][i], "item")
                     changes["Item & Storage Changes"].append(f"Storage Slot {i+1}: \"{oldName}\" → \"{newName}\"")
 
         if original.get("darkDollar") != current.get("darkDollar"):
