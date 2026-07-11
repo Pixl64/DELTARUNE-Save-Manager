@@ -4,7 +4,7 @@ from tkinter.constants import END, LEFT, TOP, X, BOTH
 from src.save_editor.drag.draggabblelistbox import DragManager, DraggableListbox
 
 class PartyMember(LabelFrame):
-    def __init__(self, parent, memberName:str, appConfig:dict, chapterLimits:dict, currentChapter:int, equippedItemData:dict, dragManager:DragManager):
+    def __init__(self, parent, memberName:str, appConfig:dict, currentChapter:int, equippedItemData:dict, dragManager:DragManager):
         super().__init__(parent, text=memberName)
         
         self.currentHPVar = StringVar(value=str(equippedItemData.get("currentHP", 0)))
@@ -20,10 +20,9 @@ class PartyMember(LabelFrame):
         self.partyMemberListbox = DraggableListbox(
             self,
             dragManager,
-            chapterLimits=chapterLimits,
+            appConfig,
             chapter=currentChapter,
             allowInternalSwap=True,
-            appConfig=appConfig,
             height=3,
         )
         self.partyMemberListbox.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)

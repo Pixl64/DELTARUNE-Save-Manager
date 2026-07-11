@@ -6,7 +6,7 @@ from src.save_editor.drag.draggabblelistbox import DraggableListbox
 
 class DraggableGrid(Frame):
     """A grid of draggable items with context menu support."""
-    def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapterLimits=None, chapter=1, **kwargs):
+    def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapter=1, **kwargs):
         if "colors" not in appConfig:
             appConfig["colors"] = {}
             appConfig["colors"]["selectBackground"] = "#00c5ff"
@@ -19,7 +19,6 @@ class DraggableGrid(Frame):
         self.appConfig = appConfig
         self.listboxes = []
         self.dw_invItems = appConfig.get("dw_invItems", {}) if appConfig else {}
-        self.chapterLimits = chapterLimits or {}
         self.chapter = chapter
         self.colors = appConfig.get("colors", {}) if appConfig else {}
         
@@ -39,7 +38,6 @@ class DraggableGrid(Frame):
                     self,
                     self.dragManager,
                     self.appConfig,
-                    chapterLimits=self.chapterLimits,
                     chapter=self.chapter,
                     allowInternalSwap=True,
                     height=1,

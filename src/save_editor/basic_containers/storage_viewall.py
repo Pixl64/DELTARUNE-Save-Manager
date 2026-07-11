@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.save_editor.basic_containers.storage import Storage  # Import Storage for type hinting only
 
-def _open_view_all_window(parent:Storage, storageData, appConfig, chapterLimits, currentChapter):
+def _open_view_all_window(parent:Storage, storageData, appConfig, currentChapter):
     """Open a window showing all storage items for easy management"""
     
     # Create new window
@@ -42,7 +42,7 @@ def _open_view_all_window(parent:Storage, storageData, appConfig, chapterLimits,
 
         # Put a "Inventory" inside this frame
         data = storageData[page_num * parent.ITEMS_PER_PAGE : (page_num + 1) * parent.ITEMS_PER_PAGE]
-        page_frame = Inventory(main_frame, f"Page {page_num + 1}", appConfig, chapterLimits, currentChapter, data, view_all_drag_manager)
+        page_frame = Inventory(main_frame, f"Page {page_num + 1}", appConfig, currentChapter, data, view_all_drag_manager)
         page_frame.grid(row=frame_row, column=frame_col, padx=10, pady=10, sticky="nsew")
         
         all_listboxes.extend(page_frame.getListboxes())  # Assuming Inventory has a 'listbox' attribute

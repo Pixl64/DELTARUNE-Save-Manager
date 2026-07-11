@@ -15,7 +15,7 @@ from src.save_editor.drag.dragmanager import DragManager
 class DraggableListbox(Listbox):
     """A Listbox with drag-and-drop functionality and context menu support."""
     
-    def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapterLimits=None, chapter=1, allowInternalSwap=True, **kwargs):
+    def __init__(self, parent:Widget, dragManager:DragManager, appConfig:dict, chapter=1, allowInternalSwap=True, **kwargs):
         if "colors" not in appConfig:
             appConfig["colors"] = {}
             appConfig["colors"]["selectBackground"] = "#00c5ff"
@@ -26,7 +26,6 @@ class DraggableListbox(Listbox):
         self.dragManager = dragManager
         self.appConfig = appConfig or {}
         self.dw_invItems = appConfig.get("dw_invItems", {}) if appConfig else {}
-        self.chapterLimits = chapterLimits or {}
         self.chapter = chapter
         self.allowInternalSwap = allowInternalSwap
         self.colors = appConfig.get('colors', {}) if appConfig else {}
@@ -84,7 +83,7 @@ class DraggableListbox(Listbox):
         replace_menu.add_command(label="Clear Slot", command=lambda: self.setItemId(index, 0))
         replace_menu.add_separator()
 
-        chapters = filter_and_group_items_by_chapter(availableItems, self.chapterLimits or {}, self.chapter, itemTag)
+        chapters = filter_and_group_items_by_chapter(availableItems, self.appConfig, self.chapter, itemTag)
 
         multiple_chapters = len(chapters) > 1
         for chapter, chapter_items in chapters.items():
@@ -199,8 +198,7 @@ class DraggableListbox(Listbox):
 class DraggableScrollableListbox(Frame):
     """A scrollable wrapper for DraggableListbox with vertical scrollbar."""
     
-    def __init__(self, parent, dragManager: DragManager, appConfig:dict, chapterLimits=None, 
-                 currentChapter=1, allowInternalSwap=True, **kwargs):
+    def __init__(self, parent, dragManager: DragManager, appConfig:dict, currentChapter=1, allowInternalSwap=True, **kwargs):
         super().__init__(parent)
         
         # Create listbox and scrollbar
@@ -208,7 +206,6 @@ class DraggableScrollableListbox(Frame):
             self,
             dragManager,
             appConfig,
-            chapterLimits=chapterLimits,
             chapter=currentChapter,
             allowInternalSwap=allowInternalSwap,
             **kwargs,

@@ -7,17 +7,16 @@ from src.save_editor.drag.dragmanager import DragManager
 from src.save_editor.drag.draggablegrid import DraggableGrid
 
 class Inventory(LabelFrame):
-    def __init__(self, parent, title: str, appconfig: dict, chapterLimits: dict, currentChapter: int, inventoryData: list, dragManager: DragManager):
+    def __init__(self, parent, title: str, appconfig: dict, currentChapter: int, inventoryData: list, dragManager: DragManager):
         super().__init__(parent, text=title)
         self.parent = parent
         self.appconfig = appconfig
-        self.chapterLimits = chapterLimits
         self.currentChapter = currentChapter
         self.storageData = inventoryData
         self.dragManager = dragManager
 
         # Create the DraggableGrid for the inventory items
-        self.draggableGrid = DraggableGrid(self, self.dragManager, self.appconfig, self.chapterLimits, self.currentChapter)
+        self.draggableGrid = DraggableGrid(self, self.dragManager, self.appconfig, self.currentChapter)
         self.draggableGrid.pack(fill=BOTH, expand=True)
         
         self.updateInventory(self.storageData)  # Populate the grid with initial storage data

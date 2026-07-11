@@ -4,16 +4,15 @@ from tkinter.constants import END, LEFT, BOTH
 from src.save_editor.drag.draggabblelistbox import DragManager, DraggableListbox, DraggableScrollableListbox
 
 class BasicContainer(LabelFrame):
-    def __init__(self, parent, title:str, appConfig:dict, chapterLimits:dict, currentChapter:int, itemData:list, itemType:str, dragManager:DragManager):
+    def __init__(self, parent, title:str, appConfig:dict, currentChapter:int, itemData:list, itemType:str, dragManager:DragManager):
         super().__init__(parent, text=title)
         
         self.itemListbox = DraggableListbox(
             self,
             dragManager,
-            chapterLimits=chapterLimits,
+            appConfig,
             chapter=currentChapter,
             allowInternalSwap=True,
-            appConfig=appConfig,
             height=10,
         )
         self.itemListbox.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=5)
@@ -33,16 +32,15 @@ class BasicContainer(LabelFrame):
         return items
 
 class LongItemContainer(LabelFrame):
-    def __init__(self, parent, title:str, appConfig:dict, chapterLimits:dict, currentChapter:int, itemData:list, itemType:str, dragManager:DragManager):
+    def __init__(self, parent, title:str, appConfig:dict, currentChapter:int, itemData:list, itemType:str, dragManager:DragManager):
         super().__init__(parent, text=title)
         
         self.itemListbox = DraggableScrollableListbox(
             self,
             dragManager,
-            chapterLimits=chapterLimits,
+            appConfig,
             currentChapter=currentChapter,
             allowInternalSwap=True,
-            appConfig=appConfig,
             height=10,
         )
         self.itemListbox.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=5)

@@ -46,10 +46,10 @@ class SaveFileEdit(Dialog):
 
         # Top: Party Frame (horizontal row of party members)
         self.partyFrame = Frame(self.mainFrame)
-        self.krisItems = PartyMember(self.partyFrame, "Kris", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["kris"], self.dragManager)
-        self.susieItems = PartyMember(self.partyFrame, "Susie", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["susie"], self.dragManager)
-        self.ralseiItems = PartyMember(self.partyFrame, "Ralsei", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["ralsei"], self.dragManager)
-        self.noelleItems = PartyMember(self.partyFrame, "Noelle", self.fullConfig, self.fullConfig, self.chapter, self.saveData["party"]["noelle"], self.dragManager)
+        self.krisItems = PartyMember(self.partyFrame, "Kris", self.fullConfig, self.chapter, self.saveData["party"]["kris"], self.dragManager)
+        self.susieItems = PartyMember(self.partyFrame, "Susie", self.fullConfig, self.chapter, self.saveData["party"]["susie"], self.dragManager)
+        self.ralseiItems = PartyMember(self.partyFrame, "Ralsei", self.fullConfig, self.chapter, self.saveData["party"]["ralsei"], self.dragManager)
+        self.noelleItems = PartyMember(self.partyFrame, "Noelle", self.fullConfig, self.chapter, self.saveData["party"]["noelle"], self.dragManager)
 
         self.krisItems.pack(side=LEFT, anchor=NW, padx=(5,0), pady=(0,5))
         self.susieItems.pack(side=LEFT, anchor=NW)
@@ -59,12 +59,12 @@ class SaveFileEdit(Dialog):
 
         # Row 2: Armor, Weapons, Key Items (side by side)
         self.row2Frame = Frame(self.mainFrame)
-        self.armorItems = LongItemContainer(self.row2Frame, "Armor", self.fullConfig, self.fullConfig, self.chapter, self.saveData["armor"], "armor", self.dragManager)
+        self.armorItems = LongItemContainer(self.row2Frame, "Armor", self.fullConfig, self.chapter, self.saveData["armor"], "armor", self.dragManager)
         self.armorItems.itemListbox.listbox.config(width=12)
-        self.weaponItems = LongItemContainer(self.row2Frame, "Weapons", self.fullConfig, self.fullConfig, self.chapter, self.saveData["weapons"], "weapon", self.dragManager)
+        self.weaponItems = LongItemContainer(self.row2Frame, "Weapons", self.fullConfig, self.chapter, self.saveData["weapons"], "weapon", self.dragManager)
         self.weaponItems.itemListbox.listbox.config(width=12)
         self.keyItemsContainer = BasicContainer(
-            self.row2Frame, "Key Items", self.fullConfig, self.fullConfig, self.chapter, self.saveData["keyItems"], "keyItem", self.dragManager
+            self.row2Frame, "Key Items", self.fullConfig, self.chapter, self.saveData["keyItems"], "keyItem", self.dragManager
         )
         self.keyItemsContainer.itemListbox.config(width=14, height=12)
 
@@ -103,7 +103,6 @@ class SaveFileEdit(Dialog):
             self.row3Frame,
             "Inventory",
             self.fullConfig,
-            self.fullConfig,
             self.chapter,
             self.saveData["items"],
             self.dragManager
@@ -111,7 +110,6 @@ class SaveFileEdit(Dialog):
         self.storageItems = Storage(
             self.row3Frame,
             "Storage",
-            self.fullConfig,
             self.fullConfig,
             self.chapter,
             self.saveData["storage"],

@@ -8,11 +8,10 @@ from src.save_editor.drag.draggablegrid import DraggableGrid
 from src.save_editor.basic_containers.storage_viewall import _open_view_all_window
 
 class Storage(LabelFrame):
-    def __init__(self, parent, title: str, appconfig: dict, chapterLimits: dict, currentChapter: int, storageData: list, dragManager: DragManager):
+    def __init__(self, parent, title: str, appconfig: dict, currentChapter: int, storageData: list, dragManager: DragManager):
         super().__init__(parent, text=title)
         self.parent = parent
         self.appconfig = appconfig
-        self.chapterLimits = chapterLimits
         self.currentChapter = currentChapter
         self.storageData = storageData
         self.dragManager = dragManager
@@ -26,7 +25,7 @@ class Storage(LabelFrame):
         
     def _build_widgets(self):
         # Create the DraggableGrid for the inventory items
-        self.draggableGrid = DraggableGrid(self, self.dragManager, self.appconfig, self.chapterLimits, self.currentChapter)
+        self.draggableGrid = DraggableGrid(self, self.dragManager, self.appconfig, self.currentChapter)
         self.draggableGrid.pack(fill=BOTH, expand=True)
         
         # Page controls
@@ -114,7 +113,7 @@ class Storage(LabelFrame):
 
     def _open_view_all_window(self):
         self._save_page()
-        result = _open_view_all_window(self, self.storageData, self.appconfig, self.chapterLimits, self.currentChapter)
+        result = _open_view_all_window(self, self.storageData, self.appconfig, self.currentChapter)
         print("Returned from view all window:", result)
         if result is not None:
             self.storageData = result
