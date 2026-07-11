@@ -15,6 +15,8 @@ from src.save_editor.basic_containers.partymember import PartyMember
 from src.save_editor.basic_containers.inventory import Inventory
 from src.save_editor.basic_containers.storage import Storage
 
+from src.save_editor.file_managing.active_save_read import readActiveSaveFile
+
 class SaveFileEdit(Dialog):
     def __init__(self, parent, chapter:int, slot:int, dw_invItems:dict, chapterData:dict, fullConfig:dict, title=""):
         self.FileDialogueTitle = title
@@ -29,8 +31,7 @@ class SaveFileEdit(Dialog):
         
         self.savePattern = "ch1" if self.chapter == 1 else "ch2+"
         
-        with open(os.path.join(os.environ["DR_SAVE_PATH"], f"filech{self.chapter}_{self.slot}")) as f:
-            self.saveData = self.getSaveFileItemData(f)
+        self.saveData = readActiveSaveFile(chapter, slot, fullConfig)
         
         # Store original data for change tracking
         self.originalData = deepcopy(self.saveData)
@@ -306,17 +307,6 @@ class SaveFileEdit(Dialog):
         self.writeSaveFile()
         return
 
-    def _read_character_equipment(self, fileList: list, character: str) -> dict:
-        """Helper method to read character equipment and health from save file."""
-        locData = self.chapterData["dw_partyMemberLocation"][character]
-        base_idx = locData[0]
-        return {
-            "currentHP": int(fileList[base_idx].strip()),
-            "maxHP": int(fileList[base_idx + 1].strip()),
-            "weapon": int(fileList[base_idx + 6].strip()),
-            "armor1": int(fileList[base_idx + 7].strip()),
-            "armor2": int(fileList[base_idx + 8].strip())
-        }
 
     def _parse_int(self, value: str, default: int = 0) -> int:
         """Safely parse an integer value from a string."""
@@ -429,153 +419,3 @@ class SaveFileEdit(Dialog):
         # Write the modified content back to the file
         with open(save_file_path, 'w') as f:
             f.writelines(fileList)
-
-    def getSaveFileItemData(self, file:TextIO) -> dict:
-        """
-        Reads the items from a save file and returns a dictionary of items.
-        
-        :param file: The file to read from.
-        :param limiters: The limiters for the items.
-        :param savePattern: The pattern of the save file.
-
-        Valid save patterns:
-        - "ch1": For save files with 12 weapon and armor slots (chapter 1)
-        - "ch2+": For save files with 48 weapon and armor slots (chapter 2 and onwards)
-        
-        :return dict: A dictionary with the items, key items, weapons, armor, and storage
-        
-        """
-        
-        if self.savePattern not in ["ch1", "ch2+"]:
-            raise ValueError("Invalid save pattern. Must be 'ch1' or 'ch2+'.")
-        
-        resDict = {
-            "party": {
-                "kris": {
-                    "currentHP": 0,
-                    "maxHP": 0,
-                    "weapon": 0,
-                    "armor1":0,
-                    "armor2":0
-                },
-                "susie": {
-                    "currentHP": 0,
-                    "maxHP": 0,
-                    "weapon": 0,
-                    "armor1":0,
-                    "armor2":0  
-                },
-                "ralsei": {
-                    "currentHP": 0,
-                    "maxHP": 0,
-                    "weapon": 0,
-                    "armor1":0,
-                    "armor2":0
-                },
-                "noelle": {
-                    "currentHP": 0,
-                    "maxHP": 0,
-                    "weapon": 0,
-                    "armor1":0,
-                    "armor2":0
-                }
-            },
-            "items": [],
-            "keyItems": [],
-            "weapons": [],
-            "armor": [],
-            "storage": [],
-            "darkDollar": 0,
-            "points": 0
-        }
-            
-        # Read the file into a list of lines for subsequent parsing
-        fileList = file.readlines()
-        if self.savePattern == "ch1":
-            start = self.chapterData["dw_invStart"]
-            end = self.chapterData["dw_invEnd"]
-            items = fileList[start-1:end]
-            
-            # Check if the item counts match the expected values for chapter 1
-            if self.chapterData["dw_invCount"]["item"] != 12 or \
-                    self.chapterData["dw_invCount"]["keyItem"] != 12 or \
-                    self.chapterData["dw_invCount"]["weapon"] != 12 or \
-                    self.chapterData["dw_invCount"]["armor"] != 12:
-                raise ValueError("Invalid item count in save file. Expected 12 items, key items, weapons, and armor.")
-            
-            # Read items, key items, weapons, and armor from the file
-            # As this is a chapter 1 save file, 12 items of each is expected.
-            for i in range(12):
-                resDict["items"].append(int(items[i*4].strip()))
-                resDict["keyItems"].append(int(items[i*4 + 1].strip()))
-                resDict["weapons"].append(int(items[i*4 + 2].strip()))
-                resDict["armor"].append(int(items[i*4 + 3].strip()))
-
-            # Get equipped item data
-            for character in ["kris", "susie", "ralsei"]:
-                resDict["party"][character] = self._read_character_equipment(fileList, character)
-            
-        if self.savePattern == "ch2+":
-            invStart = self.chapterData["dw_invStart"]
-            invEnd = self.chapterData["dw_invEnd"]
-            items = fileList[invStart-1:invEnd]
-            
-            # Check if the item counts match the expected values for chapter 2 and onwards
-            if self.chapterData["dw_invCount"]["item"] != self.chapterData["dw_invCount"]["keyItem"]:
-                raise ValueError("Invalid item count in save file. Expected equal item and key item counts.")
-            
-            # Read held items and key items from the file
-            itemsAndKeyItems = items[:self.chapterData["dw_invCount"]["item"] * 2]
-            for i in range(self.chapterData["dw_invCount"]["item"]):
-                resDict["items"].append(int(itemsAndKeyItems[i*2].strip()))
-                resDict["keyItems"].append(int(itemsAndKeyItems[i*2 + 1].strip()))
-            
-            # Check if the weapon and armor counts match the expected values for chapter 2 and onwards
-            if self.chapterData["dw_invCount"]["weapon"] != self.chapterData["dw_invCount"]["armor"]:
-                raise ValueError("Invalid weapon and armor count in save file. Expected equal weapon and armor counts.")
-            
-            # Read weapons and armor from the file
-            armorAndWeapons = items[self.chapterData["dw_invCount"]["item"] * 2+2:]
-            for i in range(self.chapterData["dw_invCount"]["weapon"]):
-                resDict["weapons"].append(int(armorAndWeapons[i*2].strip()))
-                resDict["armor"].append(int(armorAndWeapons[i*2 + 1].strip()))
-            
-            # Get equipped item data
-            for character in ["kris", "susie", "ralsei", "noelle"]:
-                resDict["party"][character] = self._read_character_equipment(fileList, character)
-                
-            
-        # If storage is present, read it
-        if "dw_storageStart" in self.chapterData and "dw_storageEnd" in self.chapterData:
-            storageStart = self.chapterData["dw_storageStart"]
-            storageEnd = self.chapterData["dw_storageEnd"]
-            storageLength = self.chapterData["dw_invCount"]["storage"]
-            
-            # Check if the storage count matches the expected value
-            if storageLength != storageEnd - storageStart + 1:
-                raise ValueError(f"Invalid storage count in save file. Expected {storageLength} storage items instead of {storageEnd - storageStart + 1}.")
-
-            storageItems = fileList[storageStart-1:storageEnd]
-            resDict["storage"] = [int(item.strip()) for item in storageItems]
-
-        if "dw_darkDollarLine" in self.chapterData:
-            darkDollarIdx = self.chapterData["dw_darkDollarLine"] - 1
-            if 0 <= darkDollarIdx < len(fileList):
-                resDict["darkDollar"] = int(fileList[darkDollarIdx].strip())
-
-        if "dw_floweryDollarsLine" in self.chapterData:
-            floweryDollarsIdx = self.chapterData["dw_floweryDollarsLine"] - 1
-            if 0 <= floweryDollarsIdx < len(fileList):
-                resDict["floweryDollars"] = int(fileList[floweryDollarsIdx].strip())
-
-        if "dw_pinkCoinsLine" in self.chapterData:
-            pinkCoinsIdx = self.chapterData["dw_pinkCoinsLine"] - 1
-            if 0 <= pinkCoinsIdx < len(fileList):
-                resDict["pinkCoins"] = int(fileList[pinkCoinsIdx].strip())
-
-        if "dw_pointsLine" in self.chapterData:
-            pointsIdx = self.chapterData["dw_pointsLine"] - 1
-            if 0 <= pointsIdx < len(fileList):
-                resDict["points"] = int(float(fileList[pointsIdx].strip()))
-
-        return resDict
