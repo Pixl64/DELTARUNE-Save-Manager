@@ -1,5 +1,5 @@
 import os
-import copy
+from copy import deepcopy
 from typing import TextIO
 
 from tkinter import Frame, LabelFrame, Label, Entry, StringVar
@@ -32,7 +32,7 @@ class SaveFileEdit(Dialog):
             self.saveData = self.getSaveFileItemData(f)
         
         # Store original data for change tracking
-        self.originalData = self._deepCopyData(self.saveData)
+        self.originalData = deepcopy(self.saveData)
         
         # Initialize the dialog
         super().__init__(parent, title=title)
@@ -153,10 +153,6 @@ class SaveFileEdit(Dialog):
             # Enable Storage frame as it is not in chapter 1
             for lb in self.storageItems.getListboxes():
                 self.dragManager.registerListbox(lb)
-
-    def _deepCopyData(self, data):
-        """Create a deep copy of save data for change tracking."""
-        return copy.deepcopy(data)
     
     def _getItemName(self, itemId, itemType):
         """Get the display name for an item ID and type."""
