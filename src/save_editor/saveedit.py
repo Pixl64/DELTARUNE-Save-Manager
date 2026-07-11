@@ -26,10 +26,7 @@ class SaveFileEdit(Dialog):
         
         self.dragManager = DragManager(parent, fullConfig)
         
-        if self.chapter == 1:
-            self.savePattern = "ch1"
-        else:
-            self.savePattern = "ch2+"
+        self.savePattern = "ch1" if self.chapter == 1 else "ch2+"
         
         with open(os.path.join(os.environ["DR_SAVE_PATH"], f"filech{self.chapter}_{self.slot}")) as f:
             self.saveData = self.getSaveFileItemData(f)
