@@ -1,6 +1,12 @@
 {
     "default": {
         "roomIDLineNumber": 3054,
+        "chapterToggles": {
+            "showPoints": false,
+            "showFloweryDollars": false,
+            "showPinkCoins": false,
+            "showNoelle": false
+        },
         "dw_invStart": 330,
         "dw_invEnd": 451,
         "dw_storageStart": 452,
@@ -36,7 +42,6 @@
             "weapon": [[0, 10]],
             "armor": [[0, 7]]
         },
-        "dw_darkDollarLine": 11,
         "dw_partyMemberLocation": {
             "kris": [70, 79],
             "susie": [124, 133],
@@ -45,6 +50,9 @@
         }
     },
     "chapter2": {
+        "chapterToggles": {
+            "showNoelle": true
+        },
         "dw_storageEnd": 475,
         "dw_invCount": {
             "item": 12,
@@ -61,6 +69,9 @@
         }
     },
     "chapter3": {
+        "chapterToggles": {
+            "showPoints": true
+        },
         "dw_storageEnd": 475,
         "dw_invCount": {
             "item": 12,
@@ -95,6 +106,10 @@
         "dw_pointsLine": 1597
     },
     "chapter5": {
+        "chapterToggles": {
+            "showFloweryDollars": true,
+            "showPinkCoins": true
+        },
         "dw_storageEnd": 499,
         "dw_invCount": {
             "item": 12,

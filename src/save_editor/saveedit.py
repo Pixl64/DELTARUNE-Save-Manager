@@ -53,12 +53,17 @@ class SaveFileEdit(Dialog):
         self.krisItems = PartyMember(self.partyFrame, "Kris", self.fullConfig, self.chapter, self.saveData["party"]["kris"], self.dragManager)
         self.susieItems = PartyMember(self.partyFrame, "Susie", self.fullConfig, self.chapter, self.saveData["party"]["susie"], self.dragManager)
         self.ralseiItems = PartyMember(self.partyFrame, "Ralsei", self.fullConfig, self.chapter, self.saveData["party"]["ralsei"], self.dragManager)
-        self.noelleItems = PartyMember(self.partyFrame, "Noelle", self.fullConfig, self.chapter, self.saveData["party"]["noelle"], self.dragManager)
 
         self.krisItems.pack(side=LEFT, anchor=NW, padx=(5,0), pady=(0,5))
         self.susieItems.pack(side=LEFT, anchor=NW)
         self.ralseiItems.pack(side=LEFT, anchor=NW)
-        self.noelleItems.pack(side=LEFT, anchor=NW, padx=(0,5))
+        
+        if self.isToggleEnabled("showNoelle", default=False):
+            self.noelleItems = PartyMember(self.partyFrame, "Noelle", self.fullConfig, self.chapter, self.saveData["party"]["noelle"], self.dragManager)
+            self.noelleItems.pack(side=LEFT, anchor=NW, padx=(0,5))
+        else: 
+            self.noelleItems = None
+        
         self.partyFrame.pack(side=TOP, fill=X, padx=5, pady=(5, 0))
 
         # Row 2: Armor, Weapons, Key Items (side by side)
@@ -95,6 +100,15 @@ class SaveFileEdit(Dialog):
 
         for label, variable, enabled in stats:
             if not enabled:
+                continue
+            
+            map = {
+                "Points": "showPoints",
+                "Flowery Dollars": "showFloweryDollars",
+                "Pink Coins": "showPinkCoins"
+            }
+            
+            if label in map and not self.isToggleEnabled(map[label], default=True):
                 continue
 
             Label(self.statsFrame, text=f"{label}:") \
@@ -159,17 +173,6 @@ class SaveFileEdit(Dialog):
         
 
         self.mainFrame.pack(fill=BOTH, expand=True)
-
-        # Remove items that don't exist in chapter 1
-        if self.chapter == 1:
-            self.noelleItems.pack_forget()
-            # Storage container is already not packed in chapter 1
-        else:
-            # Enable Noelle frame as she is not in chapter 1
-            self.dragManager.registerListbox(self.noelleItems.getListbox())
-            # Enable Storage frame as it is not in chapter 1
-            for lb in self.storageItems.getListboxes():
-                self.dragManager.registerListbox(lb)
     
     def validate(self):
         """Validate and show changes before saving."""
@@ -179,7 +182,7 @@ class SaveFileEdit(Dialog):
                 "kris": self.krisItems.getAllItems(),
                 "susie": self.susieItems.getAllItems(),
                 "ralsei": self.ralseiItems.getAllItems(),
-                "noelle": self.noelleItems.getAllItems() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
+                "noelle": self.noelleItems.getAllItems() if self.noelleItems is not None else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
             },
             "items": self.itemsContainer.getAllItems(),
             "keyItems": self.keyItemsContainer.getAllItems(),
@@ -231,7 +234,7 @@ class SaveFileEdit(Dialog):
                 "kris": self.krisItems.getAllItems(),
                 "susie": self.susieItems.getAllItems(),
                 "ralsei": self.ralseiItems.getAllItems(),
-                "noelle": self.noelleItems.getAllItems() if hasattr(self, 'noelleItems') else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
+                "noelle": self.noelleItems.getAllItems() if self.noelleItems is not None else {"currentHP": 0, "maxHP": 0, "weapon": 0, "armor1": 0, "armor2": 0}
             },
             "items": self.itemsContainer.getAllItems(),
             "keyItems": self.keyItemsContainer.getAllItems(),
@@ -248,6 +251,9 @@ class SaveFileEdit(Dialog):
         writeActiveSaveFile(self.chapter, self.slot, newData, self.fullConfig)
         return
 
+    def isToggleEnabled(self, toggleName: str, default=True):
+        print(f"Checking toggle '{toggleName}' in chapter {self.chapter}: {self.chapterData.get('chapterToggles', {}).get(toggleName, default)}")
+        return self.chapterData.get("chapterToggles", {}).get(toggleName, default)
 
     def _parse_int(self, value: str, default: int = 0) -> int:
         """Safely parse an integer value from a string."""
