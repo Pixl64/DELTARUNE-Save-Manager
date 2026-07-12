@@ -64,9 +64,9 @@ class SaveFileEdit(Dialog):
         # Row 2: Armor, Weapons, Key Items (side by side)
         self.row2Frame = Frame(self.mainFrame)
         self.armorItems = LongItemContainer(self.row2Frame, "Armor", self.fullConfig, self.chapter, self.saveData["armor"], "armor", self.dragManager)
-        self.armorItems.itemListbox.listbox.config(width=12)
+        self.armorItems.itemListbox.listbox.config(width=12, height=12)
         self.weaponItems = LongItemContainer(self.row2Frame, "Weapons", self.fullConfig, self.chapter, self.saveData["weapons"], "weapon", self.dragManager)
-        self.weaponItems.itemListbox.listbox.config(width=12)
+        self.weaponItems.itemListbox.listbox.config(width=12, height=12)
         self.keyItemsContainer = BasicContainer(
             self.row2Frame, "Key Items", self.fullConfig, self.chapter, self.saveData["keyItems"], "keyItem", self.dragManager
         )
