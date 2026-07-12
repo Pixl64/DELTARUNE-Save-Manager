@@ -25,6 +25,7 @@ class PartyMember(LabelFrame):
             allowInternalSwap=True,
             height=3,
         )
+        self.partyMemberListbox.owner = memberName.lower()
         self.partyMemberListbox.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=5)
 
         # Insert items using IDs and tags

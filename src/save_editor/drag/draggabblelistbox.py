@@ -5,6 +5,7 @@ from tkinter.constants import SINGLE, VERTICAL, LEFT, BOTH, RIGHT, Y, END
 import tkinter.messagebox as messagebox
 from src.save_editor.drag.drag_utils import (
     CATEGORY_MAP,
+    can_equip,
     format_item_type,
     get_item_name,
     filter_and_group_items_by_chapter,
@@ -29,6 +30,7 @@ class DraggableListbox(Listbox):
         self.chapter = chapter
         self.allowInternalSwap = allowInternalSwap
         self.colors = appConfig.get('colors', {}) if appConfig else {}
+        self.owner: Optional[str] = None
         
         # Item tracking
         self.itemTags = {}  # Maps index to item tag (type)
@@ -104,6 +106,22 @@ class DraggableListbox(Listbox):
             context_menu.tk_popup(event.x_root, event.y_root)
         finally:
             context_menu.grab_release()
+    
+    def acceptsItem(self, item_id, item_tag):
+        owner = getattr(self, "owner", None)
+
+        print(owner)
+
+        if owner is None:
+            # inventory listboxes accept everything
+            return True
+
+        return can_equip(
+            self.dw_invItems,
+            item_id,
+            item_tag,
+            owner
+        )
         
     def insertWithId(self, index: Union[int, str], itemId: int, tag: str) -> None:
         """Insert an item with an associated ID and tag, converting ID to display name"""

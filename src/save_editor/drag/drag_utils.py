@@ -9,17 +9,59 @@ CATEGORY_MAP = {
     "armor": "armor",
 }
 
+CHARACTER_BITS = {
+    "kris": 1,
+    "susie": 2,
+    "ralsei": 4,
+    "noelle": 8,
+}
+
+def can_equip(dw_invItems:dict, item_id:int, item_tag:str, character:str):
+    print(f"Checking if character '{character}' can equip item_id '{item_id}' with tag '{item_tag}'")
+    if item_tag not in ["weapon", "armor"]:
+        print(f"Item tag '{item_tag}' is not a weapon or armor, so it can be equipped by any character.")
+        return True      # Only weapons and armor have equip restrictions
+    
+    category = CATEGORY_MAP.get(item_tag, item_tag)
+    equippable = dw_invItems.get(category, {}).get(str(item_id))
+    if equippable is None:
+        print(f"Item ID '{item_id}' not found in category '{category}'. Cannot equip.")
+        return False
+
+    equip_mask = int(equippable["equip"], 2)
+
+    character_bit = CHARACTER_BITS[character]
+
+    print(f"Result of equip check: equip_mask={equip_mask}, character_bit={character_bit}, can_equip={(equip_mask & character_bit) != 0}")
+
+    return (equip_mask & character_bit) != 0
+
 def format_item_type(item_tag: str) -> str:
     """Convert camelCase item tag to Title Case (e.g., 'keyItem' -> 'Key Item')."""
     return re.sub(r'(?<!^)(?=[A-Z])', ' ', item_tag).title()
 
-def get_item_name(dw_invItems: Dict[str, Dict[str, str]], item_id, tag: str) -> str:
+def get_item_name(dw_invItems: Dict[str, Dict], item_id, tag: str) -> str:
     """Return display name for an item id and tag; fall back to a placeholder."""
     if item_id is None:
         return f"Unknown {tag} (None)"
+    
     category = CATEGORY_MAP.get(tag, "items")
     item_dict = dw_invItems.get(category, {})
-    return item_dict.get(str(item_id), f"Unknown {tag} ({item_id})")
+
+    item = item_dict.get(str(item_id))
+
+    if item is None:
+        return f"Unknown {tag} ({item_id})"
+
+    # Key Item format: "1": "Cell Phone"
+    if isinstance(item, str):
+        return item
+
+    # New format: "1": {"name": "Wood Blade", "equip": "0001"}
+    if isinstance(item, dict):
+        return item.get("name", f"Unknown {tag} ({item_id})")
+
+    return f"Unknown {tag} ({item_id})"
 
 def _item_in_ranges(item_value: int, ranges) -> bool:
     for item_range in ranges:
@@ -64,7 +106,12 @@ def filter_and_group_items_by_chapter(available_items: dict, appConfig: dict, cu
             continue
         item_chapter = get_chapter_for_item(appConfig, itemId, item_tag)
         if item_chapter <= current_chapter:
-            filtered.setdefault(item_chapter, []).append((item_id_int, itemName))
+            if isinstance(itemName, dict):
+                display_name = itemName["name"]
+            else:
+                display_name = itemName
+
+            filtered.setdefault(item_chapter, []).append((item_id_int, display_name))
 
     # sort ids within chapters
     for ch in filtered:

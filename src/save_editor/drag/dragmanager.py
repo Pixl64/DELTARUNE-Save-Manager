@@ -3,6 +3,8 @@ from tkinter import Toplevel, Label, RAISED
 from tkinter.constants import END
 from typing import Optional, TYPE_CHECKING
 
+from src.save_editor.drag.drag_utils import can_equip
+
 if TYPE_CHECKING:
     from src.save_editor.drag.draggabblelistbox import DraggableListbox
 
@@ -210,7 +212,8 @@ class DragManager:
         targetIndex,
     ):
         if self.drag is None:
-            return
+            return False
+
         if self.drag.listbox is None or self.drag.index is None:
             return False
 
@@ -222,6 +225,14 @@ class DragManager:
             and not self.drag.listbox.allowInternalSwap
         ):
             return False
+        
+        if not self._canEquipSwap(
+            self.drag.listbox,
+            self.drag.index,
+            targetListbox,
+            targetIndex,
+        ):
+            return False
 
         return self.canSwapItems(
             self.drag.listbox,
@@ -229,6 +240,44 @@ class DragManager:
             targetListbox,
             targetIndex,
         )
+
+    def _canEquipSwap(self, sourceListbox, sourceIndex, targetListbox, targetIndex):
+        sourceOwner = getattr(sourceListbox, "owner", None)
+        targetOwner = getattr(targetListbox, "owner", None)
+
+        sourceItemId = sourceListbox.getItemId(sourceIndex)
+        sourceItemTag = sourceListbox.getItemTag(sourceIndex)
+
+        targetItemId = targetListbox.getItemId(targetIndex)
+        targetItemTag = targetListbox.getItemTag(targetIndex)
+
+        print("Source owner:", sourceOwner)
+        print("Target owner:", targetOwner)
+
+        print("Source item:", sourceItemId, sourceItemTag)
+        print("Target item:", targetItemId, targetItemTag)
+
+        # Moving source item into target slot
+        if targetOwner is not None:
+            if not can_equip(
+                targetListbox.dw_invItems,
+                sourceItemId,
+                sourceItemTag,
+                targetOwner,
+            ):
+                return False
+
+        # Moving target item into source slot
+        if sourceOwner is not None:
+            if not can_equip(
+                sourceListbox.dw_invItems,
+                targetItemId,
+                targetItemTag,
+                sourceOwner,
+            ):
+                return False
+
+        return True
 
     def canSwapItems(
         self,
