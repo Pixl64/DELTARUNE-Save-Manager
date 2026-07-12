@@ -251,12 +251,6 @@ class DragManager:
         targetItemId = targetListbox.getItemId(targetIndex)
         targetItemTag = targetListbox.getItemTag(targetIndex)
 
-        print("Source owner:", sourceOwner)
-        print("Target owner:", targetOwner)
-
-        print("Source item:", sourceItemId, sourceItemTag)
-        print("Target item:", targetItemId, targetItemTag)
-
         # Moving source item into target slot
         if targetOwner is not None:
             if not can_equip(

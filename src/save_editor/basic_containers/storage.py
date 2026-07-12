@@ -114,7 +114,6 @@ class Storage(LabelFrame):
     def _open_view_all_window(self):
         self._save_page()
         result = open_view_all_window(self, self.storageData, self.appconfig, self.currentChapter)
-        print("Returned from view all window:", result)
         if result is not None:
             self.storageData = result
             self._load_page()
