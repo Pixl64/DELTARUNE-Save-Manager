@@ -17,7 +17,7 @@ class Inventory(LabelFrame):
 
         # Create the DraggableGrid for the inventory items
         self.draggableGrid = DraggableGrid(self, self.dragManager, self.appconfig, self.currentChapter)
-        self.draggableGrid.pack(fill=BOTH, expand=True)
+        self.draggableGrid.pack(pady=5)
         
         self.updateInventory(self.storageData)  # Populate the grid with initial storage data
         

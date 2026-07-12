@@ -26,7 +26,7 @@ class Storage(LabelFrame):
     def _build_widgets(self):
         # Create the DraggableGrid for the inventory items
         self.draggableGrid = DraggableGrid(self, self.dragManager, self.appconfig, self.currentChapter)
-        self.draggableGrid.pack(fill=BOTH, expand=True)
+        self.draggableGrid.pack(pady=5)
         
         # Page controls
         self.pageFrame = Frame(self)
