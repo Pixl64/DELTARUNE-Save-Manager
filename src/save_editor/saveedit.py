@@ -252,7 +252,6 @@ class SaveFileEdit(Dialog):
         return
 
     def isToggleEnabled(self, toggleName: str, default=True):
-        print(f"Checking toggle '{toggleName}' in chapter {self.chapter}: {self.chapterData.get('chapterToggles', {}).get(toggleName, default)}")
         return self.chapterData.get("chapterToggles", {}).get(toggleName, default)
 
     def _parse_int(self, value: str, default: int = 0) -> int:
