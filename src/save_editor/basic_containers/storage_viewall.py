@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from src.save_editor.basic_containers.storage import Storage  # Import Storage for type hinting only
 
-def _open_view_all_window(parent:Storage, storageData, appConfig, currentChapter):
+def open_view_all_window(parent:Storage, storageData, appConfig, currentChapter):
     """Open a window showing all storage items for easy management"""
     
     # Create new window

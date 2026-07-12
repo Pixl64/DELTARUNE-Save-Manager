@@ -106,22 +106,6 @@ class DraggableListbox(Listbox):
             context_menu.tk_popup(event.x_root, event.y_root)
         finally:
             context_menu.grab_release()
-    
-    def acceptsItem(self, item_id, item_tag):
-        owner = getattr(self, "owner", None)
-
-        print(owner)
-
-        if owner is None:
-            # inventory listboxes accept everything
-            return True
-
-        return can_equip(
-            self.dw_invItems,
-            item_id,
-            item_tag,
-            owner
-        )
         
     def insertWithId(self, index: Union[int, str], itemId: int, tag: str) -> None:
         """Insert an item with an associated ID and tag, converting ID to display name"""

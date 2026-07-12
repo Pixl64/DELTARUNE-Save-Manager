@@ -5,7 +5,7 @@ from tkinter.constants import BOTH, LEFT, RIGHT, X, BOTTOM
 from src.save_editor.drag.dragmanager import DragManager
 
 from src.save_editor.drag.draggablegrid import DraggableGrid
-from src.save_editor.basic_containers.storage_viewall import _open_view_all_window
+from src.save_editor.basic_containers.storage_viewall import open_view_all_window
 
 class Storage(LabelFrame):
     def __init__(self, parent, title: str, appconfig: dict, currentChapter: int, storageData: list, dragManager: DragManager):
@@ -113,7 +113,7 @@ class Storage(LabelFrame):
 
     def _open_view_all_window(self):
         self._save_page()
-        result = _open_view_all_window(self, self.storageData, self.appconfig, self.currentChapter)
+        result = open_view_all_window(self, self.storageData, self.appconfig, self.currentChapter)
         print("Returned from view all window:", result)
         if result is not None:
             self.storageData = result
