@@ -17,22 +17,17 @@ CHARACTER_BITS = {
 }
 
 def can_equip(dw_invItems:dict, item_id:int, item_tag:str, character:str):
-    print(f"Checking if character '{character}' can equip item_id '{item_id}' with tag '{item_tag}'")
     if item_tag not in ["weapon", "armor"]:
-        print(f"Item tag '{item_tag}' is not a weapon or armor, so it can be equipped by any character.")
         return True      # Only weapons and armor have equip restrictions
     
     category = CATEGORY_MAP.get(item_tag, item_tag)
     equippable = dw_invItems.get(category, {}).get(str(item_id))
     if equippable is None:
-        print(f"Item ID '{item_id}' not found in category '{category}'. Cannot equip.")
         return False
 
     equip_mask = int(equippable["equip"], 2)
 
     character_bit = CHARACTER_BITS[character]
-
-    print(f"Result of equip check: equip_mask={equip_mask}, character_bit={character_bit}, can_equip={(equip_mask & character_bit) != 0}")
 
     return (equip_mask & character_bit) != 0
 
