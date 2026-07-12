@@ -77,13 +77,13 @@ def writeCurrencyValues(fileLines: list, newData: dict, chapterConfig: dict):
         fileLines[chapterConfig["dw_darkDollarLine"] - 1] = f"{newData['darkDollar']}\n"
 
     if "dw_floweryDollarsLine" in chapterConfig:
-        fileLines[chapterConfig["dw_floweryDollarsLine"] - 1] = f"{newData.get('floweryDollars', 0)}\n"
+        fileLines[chapterConfig["dw_floweryDollarsLine"] - 1] = f"{newData.get('floweryDollars')}\n"
 
     if "dw_pinkCoinsLine" in chapterConfig:
-        fileLines[chapterConfig["dw_pinkCoinsLine"] - 1] = f"{newData.get('pinkCoins', 0)}\n"
+        fileLines[chapterConfig["dw_pinkCoinsLine"] - 1] = f"{newData.get('pinkCoins')}\n"
 
     if "dw_pointsLine" in chapterConfig:
-        fileLines[chapterConfig["dw_pointsLine"] - 1] = f"{newData.get('points', 0)}\n"
+        fileLines[chapterConfig["dw_pointsLine"] - 1] = f"{newData.get('points')}\n"
 def writeActiveSaveFile(chapter:int, slot:int, newData:dict, appConfig:dict):
     """
     Write the modified data back to the save file using the same format as extraction.

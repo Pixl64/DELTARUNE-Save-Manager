@@ -77,10 +77,10 @@ class SaveFileEdit(Dialog):
         self.row2Frame.pack(side=TOP, fill=BOTH, expand=True, padx=5, pady=(0,5))
 
         self.statsFrame = LabelFrame(self.mainFrame, text="Save Stats")
-        self.darkDollarVar = StringVar(value=str(self.saveData.get("darkDollar", 0)))
-        self.pointsVar = StringVar(value=str(self.saveData.get("points", 0)))
-        self.floweryDollarsVar = StringVar(value=str(self.saveData.get("floweryDollars", 0)))
-        self.pinkCoinsVar = StringVar(value=str(self.saveData.get("pinkCoins", 0)))
+        self.darkDollarVar = StringVar(value=str(self.saveData.get("darkDollar")))
+        self.pointsVar = StringVar(value=str(self.saveData.get("points")))
+        self.floweryDollarsVar = StringVar(value=str(self.saveData.get("floweryDollars")))
+        self.pinkCoinsVar = StringVar(value=str(self.saveData.get("pinkCoins")))
 
         Label(self.statsFrame, text="Dark Dollars:").pack(side=LEFT, padx=(5,2), pady=5)
         Entry(self.statsFrame, textvariable=self.darkDollarVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
@@ -251,11 +251,16 @@ class SaveFileEdit(Dialog):
             "weapons": self.weaponItems.getAllItems(),
             "armor": self.armorItems.getAllItems(),
             "storage": self.storageItems.getAllItems() if hasattr(self, 'storageItems') else [],
-            "darkDollar": self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0)),
-            "floweryDollars": self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0)),
-            "pinkCoins": self._parse_int(self.pinkCoinsVar.get(), self.saveData.get("pinkCoins", 0)),
-            "points": self._parse_int(self.pointsVar.get(), self.saveData.get("points", 0))
         }
+        
+        if "dw_darkDollarLine" in self.chapterData:
+            currentData["darkDollar"] = self._parse_int(self.darkDollarVar.get(), self.saveData.get("darkDollar", 0))
+        if "dw_pointsLine" in self.chapterData:
+            currentData["points"] = self._parse_int(self.pointsVar.get(), self.saveData.get("points", 0))
+        if "dw_floweryDollarsLine" in self.chapterData:
+            currentData["floweryDollars"] = self._parse_int(self.floweryDollarsVar.get(), self.saveData.get("floweryDollars", 0))
+        if "dw_pinkCoinsLine" in self.chapterData:
+            currentData["pinkCoins"] = self._parse_int(self.pinkCoinsVar.get(), self.saveData.get("pinkCoins", 0))
         
         # Generate change report with categories
         changesByCategory = self._generateCategorizedChangeReport(self.originalData, currentData)
