@@ -8,7 +8,6 @@ from tkinter.constants import LEFT, TOP, X, BOTH, NW, N
 from tkinter.messagebox import askyesno
 
 from src.save_editor.drag.dragmanager import DragManager
-from src.save_editor.drag.drag_utils import get_item_name
 from src.save_editor.basic_containers.basiccontainers import BasicContainer, LongItemContainer
 from src.save_editor.basic_containers.partymember import PartyMember
 
@@ -17,6 +16,8 @@ from src.save_editor.basic_containers.storage import Storage
 
 from src.save_editor.file_managing.active_save_read import readActiveSaveFile
 from src.save_editor.file_managing.active_save_write import writeActiveSaveFile
+
+from src.save_editor.change_report import generateCategorizedChangeReport
 
 class SaveFileEdit(Dialog):
     def __init__(self, parent, chapter:int, slot:int, dw_invItems:dict, chapterData:dict, fullConfig:dict, title=""):
@@ -157,87 +158,6 @@ class SaveFileEdit(Dialog):
             for lb in self.storageItems.getListboxes():
                 self.dragManager.registerListbox(lb)
     
-    def _generateCategorizedChangeReport(self, original, current):
-        """Generate a categorized dictionary of changes between original and current data."""
-        changes = {
-            "Party Equipment Changes": [],
-            "Weapon & Armor Inventory Changes": [],
-            "Key Item Changes": [],
-            "Item & Storage Changes": [],
-            "Save Stat Changes": []
-        }
-        
-        # Check party member equipment changes
-        for character in ["kris", "susie", "ralsei", "noelle"]:
-            for slot in ["weapon", "armor1", "armor2"]:
-                oldId = original["party"][character][slot]
-                newId = current["party"][character][slot]
-                if oldId != newId:
-                    slotName = "Weapon" if slot == "weapon" else ("Armor 1" if slot == "armor1" else "Armor 2")
-                    itemType = "weapon" if slot == "weapon" else "armor"
-                    oldName = get_item_name(self.dw_invItems, oldId, itemType)
-                    newName = get_item_name(self.dw_invItems, newId, itemType)
-                    changes["Party Equipment Changes"].append(f"{character.capitalize()} {slotName}: \"{oldName}\" → \"{newName}\"")
-            # Check current and max HP changes
-            if original["party"][character].get("currentHP") != current["party"][character].get("currentHP"):
-                changes["Save Stat Changes"].append(
-                    f"{character.capitalize()} Current HP: \"{original['party'][character].get('currentHP')}\" → \"{current['party'][character].get('currentHP')}\"")
-            if original["party"][character].get("maxHP") != current["party"][character].get("maxHP"):
-                changes["Save Stat Changes"].append(
-                    f"{character.capitalize()} Max HP: \"{original['party'][character].get('maxHP')}\" → \"{current['party'][character].get('maxHP')}\"")
-        
-        # Check weapons inventory changes
-        for i in range(min(len(original["weapons"]), len(current["weapons"]))):
-            if original["weapons"][i] != current["weapons"][i]:
-                oldName = get_item_name(self.dw_invItems, original["weapons"][i], "weapon")
-                newName = get_item_name(self.dw_invItems, current["weapons"][i], "weapon")
-                changes["Weapon & Armor Inventory Changes"].append(f"Weapon Slot {i+1}: \"{oldName}\" → \"{newName}\"")
-        
-        # Check armor inventory changes
-        for i in range(min(len(original["armor"]), len(current["armor"]))):
-            if original["armor"][i] != current["armor"][i]:
-                oldName = get_item_name(self.dw_invItems, original["armor"][i], "armor")
-                newName = get_item_name(self.dw_invItems, current["armor"][i], "armor")
-                changes["Weapon & Armor Inventory Changes"].append(f"Armor Slot {i+1}: \"{oldName}\" → \"{newName}\"")
-        
-        # Check key items changes
-        for i in range(min(len(original["keyItems"]), len(current["keyItems"]))):
-            if original["keyItems"][i] != current["keyItems"][i]:
-                oldName = get_item_name(self.dw_invItems, original["keyItems"][i], "keyItem")
-                newName = get_item_name(self.dw_invItems, current["keyItems"][i], "keyItem")
-                changes["Key Item Changes"].append(f"Slot {i+1}: \"{oldName}\" → \"{newName}\"")
-        
-        # Check items inventory changes
-        for i in range(min(len(original["items"]), len(current["items"]))):
-            if original["items"][i] != current["items"][i]:
-                oldName = get_item_name(self.dw_invItems, original["items"][i], "item")
-                newName = get_item_name(self.dw_invItems, current["items"][i], "item")
-                changes["Item & Storage Changes"].append(f"Item Slot {i+1}: \"{oldName}\" → \"{newName}\"")
-        
-        # Check storage changes (if applicable)
-        if "storage" in original and "storage" in current:
-            for i in range(min(len(original["storage"]), len(current["storage"]))):
-                if original["storage"][i] != current["storage"][i]:
-                    oldName = get_item_name(self.dw_invItems, original["storage"][i], "item")
-                    newName = get_item_name(self.dw_invItems, current["storage"][i], "item")
-                    changes["Item & Storage Changes"].append(f"Storage Slot {i+1}: \"{oldName}\" → \"{newName}\"")
-
-        if original.get("darkDollar") != current.get("darkDollar"):
-            changes["Save Stat Changes"].append(f"Dark Dollars: \"{original.get('darkDollar')}\" → \"{current.get('darkDollar')}\"")
-
-        if original.get("floweryDollars") != current.get("floweryDollars"):
-            changes["Save Stat Changes"].append(
-                f"Flowery Dollars: \"{original.get('floweryDollars')}\" → \"{current.get('floweryDollars')}\"")
-
-        if original.get("pinkCoins") != current.get("pinkCoins"):
-            changes["Save Stat Changes"].append(
-                f"Pink Coins: \"{original.get('pinkCoins')}\" → \"{current.get('pinkCoins')}\"")
-
-        if original.get("points") != current.get("points"):
-            changes["Save Stat Changes"].append(f"Points: \"{original.get('points')}\" → \"{current.get('points')}\"")
-        
-        return changes
-    
     def validate(self):
         """Validate and show changes before saving."""
         # Collect current data from UI
@@ -265,7 +185,7 @@ class SaveFileEdit(Dialog):
             currentData["pinkCoins"] = self._parse_int(self.pinkCoinsVar.get(), self.saveData.get("pinkCoins", 0))
         
         # Generate change report with categories
-        changesByCategory = self._generateCategorizedChangeReport(self.originalData, currentData)
+        changesByCategory = generateCategorizedChangeReport(self.originalData, currentData, self.dw_invItems, self.chapterData)
         
         # Count total changes
         totalChanges = sum(len(changes) for changes in changesByCategory.values())
