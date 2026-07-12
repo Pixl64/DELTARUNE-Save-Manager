@@ -83,22 +83,35 @@ class SaveFileEdit(Dialog):
         self.floweryDollarsVar = StringVar(value=str(self.saveData.get("floweryDollars")))
         self.pinkCoinsVar = StringVar(value=str(self.saveData.get("pinkCoins")))
 
-        Label(self.statsFrame, text="Dark Dollars:").pack(side=LEFT, padx=(5,2), pady=5)
-        Entry(self.statsFrame, textvariable=self.darkDollarVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+        stats = [
+            ("Dark Dollars", self.darkDollarVar, True),
+            ("Points", self.pointsVar, "dw_pointsLine" in self.chapterData),
+            ("Flowery Dollars", self.floweryDollarsVar, "dw_floweryDollarsLine" in self.chapterData),
+            ("Pink Coins", self.pinkCoinsVar, "dw_pinkCoinsLine" in self.chapterData),
+        ]
 
-        if "dw_floweryDollarsLine" in self.chapterData:
-            Label(self.statsFrame, text="Flowery Dollars:").pack(side=LEFT, padx=(5,2), pady=5)
-            Entry(self.statsFrame, textvariable=self.floweryDollarsVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+        column = 0
+        row = 0
 
-        if "dw_pinkCoinsLine" in self.chapterData:
-            Label(self.statsFrame, text="Pink Coins:").pack(side=LEFT, padx=(5,2), pady=5)
-            Entry(self.statsFrame, textvariable=self.pinkCoinsVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+        for label, variable, enabled in stats:
+            if not enabled:
+                continue
 
-        if "dw_pointsLine" in self.chapterData:
-            Label(self.statsFrame, text="Points:").pack(side=LEFT, padx=(5,2), pady=5)
-            Entry(self.statsFrame, textvariable=self.pointsVar, width=12).pack(side=LEFT, padx=(0,10), pady=5)
+            Label(self.statsFrame, text=f"{label}:") \
+                .grid(row=row, column=column * 2, padx=(5, 2), pady=5, sticky="e"
+            )
 
-        self.statsFrame.pack(side=TOP, fill=X, padx=5, pady=(0,5))
+            Entry(self.statsFrame, textvariable=variable, width=12) \
+                .grid(row=row, column=column * 2 + 1, padx=(0, 10), pady=5, sticky="w"
+            )
+
+            column += 1
+
+            if column == 3:
+                column = 0
+                row += 1
+
+        self.statsFrame.pack(side=TOP, fill=X, padx=10, pady=(0,5))
 
         # Row 3: Items and Storage (side by side)
         self.row3Frame = Frame(self.mainFrame)
