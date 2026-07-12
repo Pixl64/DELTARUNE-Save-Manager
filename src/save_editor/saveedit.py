@@ -110,21 +110,23 @@ class SaveFileEdit(Dialog):
             self.saveData["items"],
             self.dragManager
         )
-        self.storageItems = Storage(
-            self.row3Frame,
-            "Storage",
-            self.fullConfig,
-            self.chapter,
-            self.saveData["storage"],
-            self.dragManager,
-        )
 
-        # Layout changes based on chapter
+        # Changes based on chapter
         if self.chapter == 1:
             # In chapter 1, only show items container and center it
             self.itemsContainer.pack(expand=True, padx=5, pady=(0,5))
         else:
             # In other chapters, show both items and storage side by side
+            
+            self.storageItems = Storage(
+                self.row3Frame,
+                "Storage",
+                self.fullConfig,
+                self.chapter,
+                self.saveData["storage"],
+                self.dragManager,
+            )
+            
             self.itemsContainer.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=(0,5), anchor=N)
             self.storageItems.pack(side=LEFT, fill=BOTH, expand=True, padx=5, pady=(0,5))
         
