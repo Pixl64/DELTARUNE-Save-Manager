@@ -15,7 +15,7 @@ class Storage(LabelFrame):
         self.currentChapter = currentChapter
         self.storageData = storageData
         self.dragManager = dragManager
-        self.currentPage = 1
+        self.currentPage = 0
         
         self.ITEMS_PER_PAGE = 12
 
