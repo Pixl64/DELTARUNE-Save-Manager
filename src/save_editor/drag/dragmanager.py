@@ -143,7 +143,7 @@ class DragManager:
                 index = actualListbox.nearest(relativeY)
 
                 if 0 <= index < actualListbox.size():
-                    # Check if target item has an ID
+
                     targetId = actualListbox.getItemId(index)
                     if targetId is None:
                         self._setDragStateColor("invalid")
@@ -341,40 +341,35 @@ class DragManager:
         return None
 
     def _highlightValidDropZones(self) -> None:
-        """Highlight all listboxes that can accept the dragged item"""
+        """Highlight individual valid/invalid drop slots."""
+
         if self.drag is None:
             return
-        if self.drag.listbox is None or self.drag.index is None:
-            return
 
         for listbox in self.listboxes:
-            # Check if same listbox and internal swapping not allowed
-            isSameListbox = listbox == self.drag.listbox
-            if isSameListbox and not self.drag.listbox.allowInternalSwap:
-                listbox.setInvalidHighlight(True)
-                continue
+            listbox.clearItemHighlights()
 
-            # Check if any items in this listbox can be swapped
-            canAccept = False
             for i in range(listbox.size()):
-                # Skip the dragged item itself
-                if isSameListbox and i == self.drag.index:
-                    continue
 
                 targetId = listbox.getItemId(i)
-                if self._canDrop(listbox, i) and targetId is not None:
-                    canAccept = True
-                    break
 
-            listbox.setDropHighlight(canAccept)
-            if not canAccept:
-                listbox.setInvalidHighlight(True)
+                if targetId is None:
+                    continue
+
+                if self._canDrop(listbox, i):
+                    listbox.setItemHighlight(
+                        i,
+                        self.colors.get("dropHighlight", "lightgreen")
+                    )
+                else:
+                    listbox.setItemHighlight(
+                        i,
+                        self.colors.get("invalidHighlight", "lightcoral")
+                    )
 
     def _clearAllHighlights(self) -> None:
-        """Clear highlighting from all listboxes"""
         for listbox in self.listboxes:
-            listbox.setDropHighlight(False)
-            listbox.setInvalidHighlight(False)
+            listbox.clearItemHighlights()
 
     def _updateDragWindowStyle(self, color: str) -> None:
         """Update drag window background color and relief style."""

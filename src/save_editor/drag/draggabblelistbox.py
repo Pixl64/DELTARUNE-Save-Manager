@@ -168,35 +168,31 @@ class DraggableListbox(Listbox):
         self.itemTags[index] = tag
         
     def setItemId(self, index: int, itemId: int) -> None:
-        """Set the ID for an item at the given index and update display"""
+        old_colour = self.itemcget(index, "bg")
+
         self.itemIds[index] = itemId
-        tag = self.getItemTag(index)
-        if tag is None:
-            tag = "item"  # Default fallback
+        tag = self.getItemTag(index) or "item"
+
         displayText = get_item_name(self.dw_invItems, itemId, tag)
         self.delete(index)
         self.insert(index, displayText)
-        
-    def setDropHighlight(self, enabled: bool = True) -> None:
-        """Set the background color to indicate valid drop zone."""
-        if enabled:
-            color = self.colors.get('dropHighlight', 'lightgreen')
-            self.config(bg=color)
-        else:
-            self.config(bg=self.originalBg)
+
+        if old_colour:
+            self.itemconfig(index, bg=old_colour)
     
-    def setInvalidHighlight(self, enabled: bool = True) -> None:
-        """Set the background color to indicate invalid drop zone."""
-        if enabled:
-            color = self.colors.get('invalidHighlight', 'lightcoral')
-            self.config(bg=color)
-        else:
-            self.config(bg=self.originalBg)
-    
-    def clearHighlight(self) -> None:
-        """Clear any highlighting and restore original background."""
-        self.config(bg=self.originalBg)
-        
+    def setItemHighlight(self, index: int, colour: str | None = None) -> None:
+        """Highlight a specific item row."""
+        if 0 <= index < self.size():
+            if colour:
+                self.itemconfig(index, bg=colour)
+            else:
+                self.itemconfig(index, bg=self.originalBg)
+
+    def clearItemHighlights(self) -> None:
+        """Reset all item row colours."""
+        for i in range(self.size()):
+            self.itemconfig(i, bg=self.originalBg)
+
     # Event handlers for drag and drop
     def _onStartDrag(self, event) -> None:
         self.dragManager.startDrag(self, event)
