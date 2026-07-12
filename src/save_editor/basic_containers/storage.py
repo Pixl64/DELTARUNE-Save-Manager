@@ -1,6 +1,5 @@
-import time
 from tkinter import LabelFrame, Frame, Label
-from tkinter.constants import BOTH, LEFT, RIGHT, X, BOTTOM
+from tkinter.constants import LEFT, RIGHT, X, BOTTOM
 
 from src.save_editor.drag.dragmanager import DragManager
 
@@ -49,9 +48,6 @@ class Storage(LabelFrame):
         self.prevBtn.bind("<Button-1>", lambda e: self._change_page(-1))
         self.nextBtn.bind("<Button-1>", lambda e: self._change_page(1))
     
-        # Register page navigation buttons with drag manager for hover functionality
-        self.dragManager.registerPageButton(self.prevBtn, lambda: self._change_page_if_possible(-1))
-        self.dragManager.registerPageButton(self.nextBtn, lambda: self._change_page_if_possible(1))
 
     
     def _load_page(self):
@@ -80,20 +76,6 @@ class Storage(LabelFrame):
         self.currentPage = new_page
         self._load_page()
     
-    def _change_page_if_possible(self, delta):
-        """Change page only if it's possible (used for drag hover functionality)"""
-        current_time = time.time()
-        
-        # Prevent rapid page changes (cooldown of 0.5 seconds)
-        if current_time - self.lastPageChange < 0.5:
-            return
-            
-        new_page = self.currentPage + delta
-        if new_page >= 0 and new_page < self.page_count():
-            self._save_page()
-            self.currentPage = new_page
-            self._load_page()
-            self.lastPageChange = current_time
     
     def _save_page(self):
         # Save current page's items back to storageData

@@ -26,7 +26,6 @@ class DragManager:
         self.appConfig = appConfig or {}
         self.colors = appConfig.get("colors", {}) if appConfig else {}
         self.listboxes = []
-        self.page_navigation_buttons = []  # List of (button, callback) tuples
 
         # Variables to track dragging
         self.drag: DragInfo | None = None
@@ -37,10 +36,6 @@ class DragManager:
     def registerListbox(self, listbox: DraggableListbox) -> None:
         """Register a listbox with the drag manager."""
         self.listboxes.append(listbox)
-
-    def registerPageButton(self, button, callback) -> None:
-        """Register a page navigation button with the drag manager."""
-        self.page_navigation_buttons.append((button, callback))
 
     def createDragWindow(self) -> None:
         """Create the drag visualization window"""
