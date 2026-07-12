@@ -60,6 +60,14 @@ def readInventoryItems(fileLines:list, chapter:int, chapterConfig:dict):
     
 def readCharacterEquipment(fileLines:list, chapterConfig:dict):
     characterData = {}
+    
+    # Character data save layout:
+    #   +0  Current HP
+    #   +1  Maximum HP
+    #   +6  Weapon
+    #   +7  Armor 1
+    #   +8  Armor 2
+    
     for character in chapterConfig["dw_partyMemberLocation"]:
         if -1 in chapterConfig["dw_partyMemberLocation"][character]:
             continue  # Skip characters with no location data
