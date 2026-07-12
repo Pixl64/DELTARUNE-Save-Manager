@@ -21,7 +21,6 @@ class DraggableListbox(Listbox):
             appConfig["colors"] = {}
             appConfig["colors"]["selectBackground"] = "#00c5ff"
         
-        super().__init__(parent, selectmode=SINGLE, **kwargs)
         
         # Configuration
         self.dragManager = dragManager
@@ -31,6 +30,10 @@ class DraggableListbox(Listbox):
         self.allowInternalSwap = allowInternalSwap
         self.colors = appConfig.get('colors', {}) if appConfig else {}
         self.owner: Optional[str] = None
+        
+        kwargs.setdefault("selectbackground", self.colors["selectBackground"])
+        
+        super().__init__(parent, selectmode=SINGLE, **kwargs)
         
         # Item tracking
         self.itemTags = {}  # Maps index to item tag (type)
