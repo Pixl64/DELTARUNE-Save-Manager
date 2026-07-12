@@ -16,6 +16,7 @@ from src.save_editor.basic_containers.inventory import Inventory
 from src.save_editor.basic_containers.storage import Storage
 
 from src.save_editor.file_managing.active_save_read import readActiveSaveFile
+from src.save_editor.file_managing.active_save_write import writeActiveSaveFile
 
 class SaveFileEdit(Dialog):
     def __init__(self, parent, chapter:int, slot:int, dw_invItems:dict, chapterData:dict, fullConfig:dict, title=""):
@@ -285,8 +286,8 @@ class SaveFileEdit(Dialog):
     def apply(self):
         """Apply changes and write the save file."""
         # Collect all data from the UI components
-        self.result = {
-            "party": {
+        newData = {
+            "partyMembers": {
                 "kris": self.krisItems.getAllItems(),
                 "susie": self.susieItems.getAllItems(),
                 "ralsei": self.ralseiItems.getAllItems(),
@@ -304,7 +305,7 @@ class SaveFileEdit(Dialog):
         }
         
         # Write the save file
-        self.writeSaveFile()
+        writeActiveSaveFile(self.chapter, self.slot, newData, self.fullConfig)
         return
 
 
@@ -317,105 +318,3 @@ class SaveFileEdit(Dialog):
                 return int(float(value.strip()))
             except (ValueError, AttributeError):
                 return default
-    
-    def _write_character_equipment(self, fileList: list, character: str, equipment: dict):
-        """Helper method to write character equipment and health to save file."""
-        locData = self.chapterData["dw_partyMemberLocation"][character]
-        base_idx = locData[0]
-        fileList[base_idx] = f"{equipment.get('currentHP', 0)}\n"
-        fileList[base_idx + 1] = f"{equipment.get('maxHP', 0)}\n"
-        fileList[base_idx + 6] = f"{equipment.get('weapon', 0)}\n"
-        fileList[base_idx + 7] = f"{equipment.get('armor1', 0)}\n"
-        fileList[base_idx + 8] = f"{equipment.get('armor2', 0)}\n"
-
-    def writeSaveFile(self):
-        """
-        Write the modified data back to the save file using the same format as extraction.
-        """
-        # Read the original file to preserve structure
-        save_file_path = os.path.join(os.environ["DR_SAVE_PATH"], f"filech{self.chapter}_{self.slot}")
-        
-        with open(save_file_path, 'r') as f:
-            fileList = f.readlines()
-        
-        # Ensure all lines end with newline
-        for i in range(len(fileList)):
-            if not fileList[i].endswith('\n'):
-                fileList[i] += '\n'
-        
-        if self.savePattern == "ch1":
-            # Write items, keyItems, weapons, and armor (12 of each)
-            start = self.chapterData["dw_invStart"]
-            
-            for i in range(12):
-                # Each group of 4 lines: item, keyItem, weapon, armor
-                item_idx = start - 1 + i * 4
-                key_item_idx = start - 1 + i * 4 + 1
-                weapon_idx = start - 1 + i * 4 + 2
-                armor_idx = start - 1 + i * 4 + 3
-                
-                fileList[item_idx] = f"{self.result['items'][i] if i < len(self.result['items']) else 0}\n"
-                fileList[key_item_idx] = f"{self.result['keyItems'][i] if i < len(self.result['keyItems']) else 0}\n"
-                fileList[weapon_idx] = f"{self.result['weapons'][i] if i < len(self.result['weapons']) else 0}\n"
-                fileList[armor_idx] = f"{self.result['armor'][i] if i < len(self.result['armor']) else 0}\n"
-            
-            # Write party member equipment for Kris, Susie, Ralsei
-            for character in ["kris", "susie", "ralsei"]:
-                self._write_character_equipment(fileList, character, self.result['party'][character])
-        
-        elif self.savePattern == "ch2+":
-            # Write items and keyItems (interleaved)
-            invStart = self.chapterData["dw_invStart"]
-            
-            for i in range(self.chapterData["dw_invCount"]["item"]):
-                item_idx = invStart - 1 + i * 2
-                key_item_idx = invStart - 1 + i * 2 + 1
-                
-                fileList[item_idx] = f"{self.result['items'][i] if i < len(self.result['items']) else 0}\n"
-                fileList[key_item_idx] = f"{self.result['keyItems'][i] if i < len(self.result['keyItems']) else 0}\n"
-            
-            # Write weapons and armor (interleaved, after items)
-            weapons_start = invStart - 1 + self.chapterData["dw_invCount"]["item"] * 2 + 2
-            
-            for i in range(self.chapterData["dw_invCount"]["weapon"]):
-                weapon_idx = weapons_start + i * 2
-                armor_idx = weapons_start + i * 2 + 1
-                
-                fileList[weapon_idx] = f"{self.result['weapons'][i] if i < len(self.result['weapons']) else 0}\n"
-                fileList[armor_idx] = f"{self.result['armor'][i] if i < len(self.result['armor']) else 0}\n"
-            
-            # Write party member equipment for Kris, Susie, Ralsei, Noelle
-            for character in ["kris", "susie", "ralsei", "noelle"]:
-                self._write_character_equipment(fileList, character, self.result['party'][character])
-        
-        # Write storage if present
-        if "dw_storageStart" in self.chapterData and "dw_storageEnd" in self.chapterData:
-            storageStart = self.chapterData["dw_storageStart"]
-            
-            for i, storage_item in enumerate(self.result["storage"]):
-                if storageStart - 1 + i < len(fileList):
-                    fileList[storageStart - 1 + i] = f"{storage_item}\n"
-
-        if "dw_darkDollarLine" in self.chapterData:
-            darkDollarIdx = self.chapterData["dw_darkDollarLine"] - 1
-            if 0 <= darkDollarIdx < len(fileList):
-                fileList[darkDollarIdx] = f"{self.result['darkDollar']}\n"
-
-        if "dw_floweryDollarsLine" in self.chapterData:
-            floweryDollarsIdx = self.chapterData["dw_floweryDollarsLine"] - 1
-            if 0 <= floweryDollarsIdx < len(fileList):
-                fileList[floweryDollarsIdx] = f"{self.result.get('floweryDollars', 0)}\n"
-
-        if "dw_pinkCoinsLine" in self.chapterData:
-            pinkCoinsIdx = self.chapterData["dw_pinkCoinsLine"] - 1
-            if 0 <= pinkCoinsIdx < len(fileList):
-                fileList[pinkCoinsIdx] = f"{self.result.get('pinkCoins', 0)}\n"
-
-        if "dw_pointsLine" in self.chapterData:
-            pointsIdx = self.chapterData["dw_pointsLine"] - 1
-            if 0 <= pointsIdx < len(fileList):
-                fileList[pointsIdx] = f"{self.result.get('points', 0)}\n"
-
-        # Write the modified content back to the file
-        with open(save_file_path, 'w') as f:
-            f.writelines(fileList)
