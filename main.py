@@ -75,15 +75,16 @@ def loadAppConfig() -> Dict[str, Any]:
     
     # Merge default config into chapters
     defaultConfig = chapterConfig.pop("default", {})
+
     for chapterKey, chapterOverrides in chapterConfig.items():
-        mergedConfig = {**defaultConfig, **chapterOverrides}
+        mergedConfig = deepMerge(defaultConfig, chapterOverrides)
 
         # Preserve any existing app-specific values
         if chapterKey in config:
-            config[chapterKey] = {
-                **config[chapterKey],
-                **mergedConfig,
-            }
+            config[chapterKey] = deepMerge(
+                config[chapterKey],
+                mergedConfig
+            )
         else:
             config[chapterKey] = mergedConfig
     
@@ -115,6 +116,21 @@ def loadUserConfig() -> Dict[str, Any]:
             os.environ["DR_EXE_PATH"] = config["launchData"]["path"]
     return config
 
+def deepMerge(base: dict, override: dict) -> dict:
+    """Recursively merge override into base."""
+    result = base.copy()
+
+    for key, value in override.items():
+        if (
+            key in result
+            and isinstance(result[key], dict)
+            and isinstance(value, dict)
+        ):
+            result[key] = deepMerge(result[key], value)
+        else:
+            result[key] = value
+
+    return result
 
 def setUpDirectories(appConfig: Dict[str, Any]) -> None:
     """ Sets up the chapter directories in the backup path """
