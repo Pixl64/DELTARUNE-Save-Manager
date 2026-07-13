@@ -3,13 +3,13 @@ from tkinter import Frame, Listbox, Menu, Scrollbar, Widget
 from tkinter.constants import BOTH, END, LEFT, RIGHT, SINGLE, VERTICAL, Y
 from typing import Optional, Union
 
-from src.save_editor.drag.drag_utils import (
+from src.save_editor.drag.dragmanager import DragManager
+from src.utils import (
     CATEGORY_MAP,
     filter_and_group_items_by_chapter,
     format_item_type,
     get_item_name,
 )
-from src.save_editor.drag.dragmanager import DragManager
 
 
 class DraggableListbox(Listbox):

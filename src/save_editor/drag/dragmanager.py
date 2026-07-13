@@ -3,7 +3,7 @@ from tkinter import RAISED, Label, Toplevel
 from tkinter.constants import END
 from typing import TYPE_CHECKING, Optional
 
-from src.save_editor.drag.drag_utils import can_equip
+from src.utils import can_equip
 
 if TYPE_CHECKING:
     from src.save_editor.drag.draggabblelistbox import DraggableListbox
