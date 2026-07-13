@@ -249,15 +249,11 @@ class SaveFileEdit(Dialog):
                 "kris": self.krisItems.getAllItems(),
                 "susie": self.susieItems.getAllItems(),
                 "ralsei": self.ralseiItems.getAllItems(),
-                "noelle": self.noelleItems.getAllItems()
-                if self.noelleItems is not None
-                else {
-                    "currentHP": 0,
-                    "maxHP": 0,
-                    "weapon": 0,
-                    "armor1": 0,
-                    "armor2": 0,
-                },
+                "noelle": (
+                    self.noelleItems.getAllItems()
+                    if self.noelleItems is not None
+                    else self.originalData["party"]["noelle"]
+                ),
             },
             "items": self.itemsContainer.getAllItems(),
             "keyItems": self.keyItemsContainer.getAllItems(),
@@ -325,15 +321,11 @@ class SaveFileEdit(Dialog):
                 "kris": self.krisItems.getAllItems(),
                 "susie": self.susieItems.getAllItems(),
                 "ralsei": self.ralseiItems.getAllItems(),
-                "noelle": self.noelleItems.getAllItems()
-                if self.noelleItems is not None
-                else {
-                    "currentHP": 0,
-                    "maxHP": 0,
-                    "weapon": 0,
-                    "armor1": 0,
-                    "armor2": 0,
-                },
+                "noelle": (
+                    self.noelleItems.getAllItems()
+                    if self.noelleItems is not None
+                    else self.saveData["party"]["noelle"]
+                ),
             },
             "items": self.itemsContainer.getAllItems(),
             "keyItems": self.keyItemsContainer.getAllItems(),

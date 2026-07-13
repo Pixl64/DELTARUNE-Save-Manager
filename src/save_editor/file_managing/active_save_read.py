@@ -67,11 +67,11 @@ def readCharacterEquipment(fileLines: list, chapterConfig: dict):
     #   +7  Armor 1
     #   +8  Armor 2
 
-    for character in chapterConfig["dw_partyMemberLocation"]:
-        if -1 in chapterConfig["dw_partyMemberLocation"][character]:
-            continue  # Skip characters with no location data
+    for character, locData in chapterConfig["dw_partyMemberLocation"].items():
+        # Character does not exist in this chapter
+        if locData[0] == -1:
+            continue
 
-        locData = chapterConfig["dw_partyMemberLocation"][character]
         base_idx = locData[0]
         characterData[character] = {
             "currentHP": int(fileLines[base_idx].strip()),
