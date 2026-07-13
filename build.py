@@ -25,6 +25,7 @@ args = {
 includedFiles = [
     iconName,
     "cfg_app.json",
+    "cfg_chapter.json",
     "cfg_room_names.json",
     "cfg_inventory_items.json",
 ]
