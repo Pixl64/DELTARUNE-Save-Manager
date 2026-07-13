@@ -175,6 +175,7 @@ class App(Tk):
                                         launch_command=self.launchGame,
                                         delete_save_command=self.deleteSave,
                                         edit_save_command=self.editSave,
+                                        download_example_saves_command=lambda: showinfo(title="Info", message="This feature is not yet implemented."),
                                         exit_command=self.exit                                        
                                     )
         

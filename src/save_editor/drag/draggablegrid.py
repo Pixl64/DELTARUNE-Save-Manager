@@ -1,4 +1,4 @@
-from tkinter import END, Widget, Frame
+from tkinter import Widget, Frame
 import tkinter.messagebox as messagebox
 
 from src.save_editor.drag.dragmanager import DragManager

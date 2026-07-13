@@ -1,8 +1,11 @@
-import os, tempfile
+import os
+import tempfile
+
+from typing import Callable
 
 from tkinter import Tk, Frame, LabelFrame, Scrollbar, Label, Button, Listbox, Entry, Spinbox, Radiobutton, IntVar, StringVar
 from tkinter.messagebox import showerror
-from tkinter.constants import *
+from tkinter.constants import LEFT, RIGHT, TOP, VERTICAL, DISABLED, NORMAL, N, EW, NW, W
 from tkinter.filedialog import askdirectory
 from tkinter.simpledialog import askstring
 
@@ -21,7 +24,7 @@ def setWindowIcon(window:Tk):
         window.iconbitmap(iconTmp)
 
 class ChapterSelectFrame(Frame):
-    def __init__(self, parent, appconfig:dict, listBoxUpdateCommand:callable):
+    def __init__(self, parent, appconfig: dict, listBoxUpdateCommand: Callable):
         super().__init__(parent)
         self.parent = parent
         
@@ -64,7 +67,7 @@ class ActiveFrame(Frame):
         # Set to default chapter if out of range, currently raises an error.
         if currentChapter < 1 or currentChapter > self.maxChapter:
             raise ValueError(f"Chapter must be between 1 and {self.maxChapter}.")
-        
+
         self.activeSavesData = getActiveDisplayData(currentChapter, self.appConfig)
         self.fill_list(self.activeSavesData["strings"])
         
@@ -72,7 +75,7 @@ class ActiveFrame(Frame):
         selected = self.listbox.curselection()
         if selected == ():
             return -1
-        if self.activeSavesData["slotData"][selected[0]]["exists"] == False:
+        if self.activeSavesData["slotData"][selected[0]]["exists"] is False:
             return {
                 "exists": False,
                 "chapter": self.currentChapter,
@@ -97,9 +100,11 @@ class BackupFrame(Frame):
         self.displayEntry = Entry(self, textvariable=self.displayPath, width=40, exportselection=False)
         self.displayEntry.config(state=DISABLED)
         selectColor = appConfig.get("colors", {}).get("selectBackground", "#00c5ff")
-        self.backupListbox = ScrollableListbox(self, selectbackground=selectColor)
+        self.backupListbox = ScrollableListbox(self, selectColor)
         # Bind a command to selecting an item in the listbox
-        self.backupListbox.bind('<<ListboxSelect>>', lambda _: self.listBoxSelectCommand())
+        self.backupListbox.bind_listbox(
+            "<<ListboxSelect>>", lambda _: self.listBoxSelectCommand()
+        )
         # Bind double click to open the folder
         self.backupListbox.bind('<Double-Button-1>', lambda _: self.openFolder())
         self.displayEntry.pack(side=TOP, anchor=NW)
@@ -255,17 +260,18 @@ class BackupFrame(Frame):
         }
 
 class RightButtonBox(LabelFrame):
-    def __init__(self, parent, 
-                backup_command:callable=None, 
-                restore_command:callable=None, 
-                settings_command:callable=None,
-                launch_command:callable=None,
-                edit_save_command:callable=None,
-                delete_save_command:callable=None,
-                download_example_saves_command:callable=None,
-                exit_command:callable=None,
-                test_command:callable=None
-                ):
+    def __init__(
+        self,
+        parent,
+        backup_command: Callable,
+        restore_command: Callable,
+        settings_command: Callable,
+        launch_command: Callable,
+        delete_save_command: Callable,
+        edit_save_command: Callable,
+        download_example_saves_command: Callable,
+        exit_command: Callable,
+    ):
         super().__init__(parent)
         self.parent = parent
         self.config(text="Options")
@@ -294,9 +300,13 @@ class RightButtonBox(LabelFrame):
         # self.buttonTest.grid(row=8, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)    
         
 class ScrollableListbox(Frame):
-    def __init__(self, parent, items=None, height=10, width=40, selectbackground=None, **kwargs):
+    def __init__(
+        self, parent, selectbackground, items=None, height=10, width=40, **kwargs
+    ):
         super().__init__(parent, **kwargs)
-        self.listbox = Listbox(self, height=height, width=width, selectbackground=selectbackground)
+        self.listbox = Listbox(
+            self, height=height, width=width, selectbackground=selectbackground
+        )
         self.scrollbar = Scrollbar(self, orient=VERTICAL, command=self.listbox.yview)
         self.listbox.config(yscrollcommand=self.scrollbar.set)
         self.listbox.pack(side=LEFT, fill='both', expand=True)
@@ -317,11 +327,13 @@ class ScrollableListbox(Frame):
     def curselection(self):
         return self.listbox.curselection()
 
-    def bind(self, sequence=None, func=None, add=None):
+    def bind_listbox(self, sequence=None, func=None, add=None):
         self.listbox.bind(sequence, func, add)
 
 class TempFrame(LabelFrame):
-    def __init__(self, parent, button_command1:callable=None, button_command2:callable=None):
+    def __init__(
+        self, parent, button_command1: Callable, button_command2: Callable
+    ):
         super().__init__(parent)
         self.parent = parent
         self.config(text="Temporary Frame")
@@ -409,7 +421,6 @@ class ActiveSaveLocationSelectorFrame(LabelFrame):
         self.dirEntry.grid(column=0, row=0, padx=(5, 2.5), pady=(0,5))
         self.selectButton.grid(column=1, row=0, padx=(2.5,5), pady=(0,5))
         self.entryFrame.grid(row=3, sticky=N)
-
 
         # Set the default option to 1
         self.defaultLocation.invoke()
@@ -504,8 +515,10 @@ class GameSelectSelectorFrame(LabelFrame):
                 
     def getValue(self):
         match self.selectedOption.get():
-            case 1: return {"type": "steam"}
-            case 2: return {"type": "custom", "path": self.exePath}        
+            case 1: 
+                return {"type": "steam"}
+            case 2: 
+                return {"type": "custom", "path": self.exePath}        
 
     def setValue(self, value:dict):
         if not value:

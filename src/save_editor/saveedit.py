@@ -1,6 +1,4 @@
-import os
 from copy import deepcopy
-from typing import TextIO
 
 from tkinter import Frame, LabelFrame, Label, Entry, StringVar
 from tkinter.simpledialog import Dialog

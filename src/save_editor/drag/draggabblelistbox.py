@@ -5,7 +5,6 @@ from tkinter.constants import SINGLE, VERTICAL, LEFT, BOTH, RIGHT, Y, END
 import tkinter.messagebox as messagebox
 from src.save_editor.drag.drag_utils import (
     CATEGORY_MAP,
-    can_equip,
     format_item_type,
     get_item_name,
     filter_and_group_items_by_chapter,

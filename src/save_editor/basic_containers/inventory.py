@@ -1,5 +1,4 @@
 from tkinter import LabelFrame
-from tkinter.constants import BOTH
 
 from src.save_editor.drag.dragmanager import DragManager
 
