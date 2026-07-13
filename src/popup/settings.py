@@ -1,7 +1,7 @@
 import json
 import os
-from tkinter import Frame, Label
-from tkinter.constants import LEFT, NW, TOP
+from tkinter import Frame
+from tkinter.constants import NW, TOP
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
@@ -27,11 +27,6 @@ class SettingsPopup(Dialog):
         self.minsize(width=250, height=100)
 
         self.mainFrame = Frame(master)
-        self.descriptionLabel = Label(
-            self.mainFrame, text="Settings menu.", wraplength=350, justify=LEFT
-        )
-
-        self.descriptionLabel.pack(side=TOP, anchor=NW, padx=5, pady=5)
 
         self.backupSaveFrame = BackupSaveLocationSelectorFrame(
             self.mainFrame,
