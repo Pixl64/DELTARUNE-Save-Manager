@@ -4,7 +4,7 @@ from tkinter.constants import LEFT, NW, TOP
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
-from src.utils import setWindowIcon
+from src.gui_utils import setWindowIcon
 from src.widgets.w_selectors import (
     ActiveSaveLocationSelectorFrame,
     BackupSaveLocationSelectorFrame,
