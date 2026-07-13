@@ -1,10 +1,11 @@
 import json
 import os
 from tkinter import Frame
-from tkinter.constants import NW, TOP
+from tkinter.constants import NW, TOP, X
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
+from src.widgets.w_buttonbox import OpenFolderButtonBox
 from src.widgets.w_selectors import (
     ActiveSaveLocationSelectorFrame,
     BackupSaveLocationSelectorFrame,
@@ -43,9 +44,13 @@ class SettingsPopup(Dialog):
             self.initialDir,
             entryWidth=self.entryWidth,
         )
+
+        self.openFolderButtonBox = OpenFolderButtonBox(self.mainFrame)
+
         self.backupSaveFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)
         self.activeSaveFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)
         self.gameSelectFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)
+        self.openFolderButtonBox.pack(side=TOP, anchor=NW, padx=5, pady=5, fill=X)
 
         # Load the current settings from user_config.json
         try:
