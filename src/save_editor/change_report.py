@@ -1,4 +1,4 @@
-from src.save_editor.drag.drag_utils import get_item_name
+from src.utils import get_item_name
 
 
 def add_change(changes, category, label, old, new, dw_invItems=None, item_type=None):
