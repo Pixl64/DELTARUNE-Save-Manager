@@ -235,6 +235,11 @@ class SaveFileEdit(Dialog):
 
         for lb in self.itemsContainer.getListboxes():
             self.dragManager.registerListbox(lb)
+
+        if hasattr(self, "storageItems"):
+            for lb in self.storageItems.getListboxes():
+                self.dragManager.registerListbox(lb)
+
         self.dragManager.registerListbox(self.keyItemsContainer.getListbox())
         self.dragManager.registerListbox(self.armorItems.getListbox())
         self.dragManager.registerListbox(self.weaponItems.getListbox())
