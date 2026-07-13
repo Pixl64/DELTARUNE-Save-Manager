@@ -121,11 +121,13 @@ class GameSelectPopup(Dialog):
         self.mainFrame.pack()
 
     def validate(self):
-        if self.gameSelectFrame.selectedOption.get() == 2:
-            if not os.path.exists(self.gameSelectFrame.exePath):
+        gameData = self.gameSelectFrame.getValue()
+
+        if gameData["type"] == "custom":
+            if not os.path.exists(gameData["path"]):
                 showerror(
                     title="Error",
-                    message=f"Game exacutable location does not exist.\n{self.gameSelectFrame.exePath}",
+                    message=f"Game executable location does not exist.\n{gameData['path']}",
                 )
                 return False
 
@@ -217,10 +219,12 @@ class SettingsPopup(Dialog):
                 )
                 return False
         if self.gameSelectFrame.selectedOption.get() == 2:
-            if not os.path.exists(self.gameSelectFrame.exePath):
+            gamePath = self.gameSelectFrame.getPath()
+
+            if not os.path.exists(gamePath):
                 showerror(
                     title="Error",
-                    message=f"Game Executable Location does not exist.\n{self.gameSelectFrame.exePath}",
+                    message=f"Game Executable Location does not exist.\n{gamePath}",
                 )
                 return False
 
