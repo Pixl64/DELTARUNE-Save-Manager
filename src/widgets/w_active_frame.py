@@ -1,6 +1,6 @@
 from tkinter import Frame, Listbox
 
-from filemanager import getActiveDisplayData
+from src.utils import getActiveDisplayData
 
 
 class ActiveFrame(Frame):

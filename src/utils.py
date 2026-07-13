@@ -1,3 +1,4 @@
+import configparser
 import os
 import re
 import tempfile
@@ -5,7 +6,7 @@ from tkinter import Tk
 from tkinter.filedialog import askdirectory, askopenfilename
 from typing import Dict
 
-from filemanager import copyFile
+from src.file_utils import copyFile
 
 # Maps item tag names to categories used in `dw_invItems`
 CATEGORY_MAP = {
@@ -21,6 +22,11 @@ CHARACTER_BITS = {
     "ralsei": 4,
     "noelle": 8,
 }
+
+
+class CaseSensitiveConfigParser(configparser.ConfigParser):
+    def optionxform(self, optionstr):
+        return optionstr
 
 
 def can_equip(dw_invItems: dict, item_id: int, item_tag: str, character: str):
@@ -66,6 +72,23 @@ def get_item_name(dw_invItems: Dict[str, Dict], item_id, tag: str) -> str:
         return item.get("name", f"Unknown {tag} ({item_id})")
 
     return f"Unknown {tag} ({item_id})"
+
+
+def find_room_name(roomId: int, saveData: dict, chapter: int) -> str:
+    """Helper function to find room name with fallback logic for Chapter 2."""
+    roomIdStr = str(roomId)
+
+    if roomIdStr in saveData["roomNames"]:
+        return saveData["roomNames"][roomIdStr]
+
+    # Chapter 2 fallback logic - try offsets
+    if chapter == 2:
+        for offset in [-1, 1, -2, 2]:
+            adjusted = str(roomId + offset)
+            if adjusted in saveData["roomNames"]:
+                return saveData["roomNames"][adjusted]
+
+    return f"Unknown Room {roomId}"
 
 
 def _item_in_ranges(item_value: int, ranges) -> bool:
@@ -170,3 +193,68 @@ def openFilePicker(title: str, initialDir: str, entryWidth: int, filetypes=None)
         return
 
     return [file, createCutPath(file, entryWidth)]
+
+
+def deepMerge(base: dict, override: dict) -> dict:
+    """Recursively merge override into base."""
+    result = base.copy()
+
+    for key, value in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deepMerge(result[key], value)
+        else:
+            result[key] = value
+
+    return result
+
+
+def getActiveDisplayData(chapter: int, appconfig: dict) -> dict:
+    drSavePath = os.environ["DR_SAVE_PATH"]
+
+    if f"chapter{chapter}" not in appconfig:
+        raise ValueError(f"No configuration found for chapter {chapter}.")
+
+    saveData = appconfig[f"chapter{chapter}"]
+    files = os.listdir(drSavePath)
+    saves = [f for f in files if f.startswith(f"filech{chapter}_") or f == "dr.ini"]
+    saves.sort()
+
+    result = {
+        "strings": [],
+        "slotData": [{}, {}, {}],
+    }
+
+    # Select correct room ID adjustment
+    adjust = {1: 10000, 2: 20000}.get(chapter, 0)
+
+    for saveSlot in range(3):
+        saveFile = f"filech{chapter}_{saveSlot}"
+
+        if saveFile not in saves:
+            result["strings"].append(f"Slot {saveSlot + 1}: [EMPTY]")
+            result["slotData"][saveSlot]["exists"] = False
+            continue
+
+        with open(os.path.join(drSavePath, saveFile)) as f:
+            lines = f.readlines()
+            roomIdLineNumber = saveData["roomIDLineNumber"]
+            roomId = int(lines[roomIdLineNumber - 1].strip())
+
+            # Adjust for DELTARUNEdemo to DELTARUNE room IDs
+            if roomId < 9999:
+                roomId += adjust
+
+            roomName = find_room_name(roomId, saveData, chapter)
+
+            # Check for completed save file
+            completed = os.path.exists(
+                os.path.join(drSavePath, f"filech{chapter}_{saveSlot + 3}")
+            )
+
+            result["slotData"][saveSlot]["exists"] = True
+            result["slotData"][saveSlot]["isComplete"] = completed
+            result["strings"].append(
+                f"Slot {saveSlot + 1}: [{roomName}]{' ★' if completed else ''}"
+            )
+
+    return result

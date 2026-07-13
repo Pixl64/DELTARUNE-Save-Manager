@@ -1,29 +1,6 @@
 import ctypes
 import json
 import os
-import sys
-import tempfile
-from typing import Any, Dict
-
-# Get current running directory
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-    dataPath = sys._MEIPASS  # type: ignore
-    runningDir = os.path.dirname(sys.executable)
-    os.chdir(runningDir)
-    # Import the pyi_splash module to close the splash screen
-    import pyi_splash  # type: ignore (This only runs in a pyinstaller environment)
-
-    def killSplash():
-        pyi_splash.close()
-else:
-    runningDir = os.path.dirname(os.path.realpath(__file__))
-    dataPath = runningDir
-
-    # Define a dummy function for killSplash if not running as a frozen executable
-    def killSplash():
-        pass
-
-
 from tkinter import LabelFrame, Tk
 from tkinter.constants import BOTH, LEFT, NW, TOP, Y
 from tkinter.messagebox import (
@@ -33,12 +10,14 @@ from tkinter.messagebox import (
     showinfo,
     showwarning,
 )
+from typing import Any, Dict
 
-from filemanager import backupSave, copyFile, restoreSave
+from src.config_load import loadAppConfig, loadUserConfig
+from src.file_utils import getCurrentWorkingDirectory, setUpDirectories, validateFiles
 from src.popup.backup_create import BackupCreatePopup
-from src.popup.first_time_setup import FirstTimeSetup
 from src.popup.game_select import GameSelectPopup
 from src.popup.settings import SettingsPopup
+from src.save_backup_restore import backupSave, restoreSave
 from src.save_editor.saveedit import SaveFileEdit
 from src.utils import setWindowIcon
 from src.widgets.w_active_frame import ActiveFrame
@@ -46,115 +25,10 @@ from src.widgets.w_backup_frame import BackupFrame
 from src.widgets.w_buttonbox import RightButtonBox
 from src.widgets.w_chapter_frame import ChapterSelectFrame
 
+runningDir, dataPath, killSplash = getCurrentWorkingDirectory()
 # Global variables
 os.environ["DSM_PATH"] = runningDir
 os.environ["DSM_DATA_PATH"] = dataPath
-
-
-def validateFiles() -> bool:
-    """Validates the existence of the app_config.json and user_config.json files, and creates the user_config.json if it does not exist."""
-    # Check for userconfig
-    if not os.path.exists(os.path.join(os.environ["DSM_PATH"], "user_config.json")):
-        tempW = Tk()
-        tempW.withdraw()
-        killSplash()
-        print("Running first time setup...")
-        data = FirstTimeSetup(tempW, title="Select Directory", initialDir=runningDir)
-        if not data.result:
-            return False
-        tempW.destroy()
-        with open(os.path.join(os.environ["DSM_PATH"], "user_config.json"), "w") as f:
-            json.dump(data.result, f, indent=4)
-
-    return True
-
-
-def loadJsonConfig(fileName: str) -> Dict[str, Any]:
-    """Loads a JSON config from the local directory or embedded data directory."""
-    localPath = os.path.join(os.environ["DSM_PATH"], fileName)
-    if os.path.exists(localPath):
-        with open(localPath) as f:
-            return json.load(f)
-
-    print(f"{fileName} not found locally. Using embedded config...")
-    with tempfile.TemporaryDirectory("DSM") as tempDir:
-        configSrc = os.path.join(os.environ["DSM_DATA_PATH"], fileName)
-        configTmp = os.path.join(tempDir, fileName)
-        copyFile(configSrc, configTmp)
-        with open(configTmp) as f:
-            return json.load(f)
-
-
-def loadAppConfig() -> Dict[str, Any]:
-    """Loads the application configuration."""
-
-    config = loadJsonConfig("cfg_app.json")
-    chapterConfig = loadJsonConfig("cfg_chapter.json")
-    roomNames = loadJsonConfig("cfg_room_names.json")
-    inventoryItems = loadJsonConfig("cfg_inventory_items.json")
-
-    # Merge default config into chapters
-    defaultConfig = chapterConfig.pop("default", {})
-
-    for chapterKey, chapterOverrides in chapterConfig.items():
-        mergedConfig = deepMerge(defaultConfig, chapterOverrides)
-
-        # Preserve any existing app-specific values
-        if chapterKey in config:
-            config[chapterKey] = deepMerge(config[chapterKey], mergedConfig)
-        else:
-            config[chapterKey] = mergedConfig
-
-    for chapterKey, chapterRooms in roomNames.items():
-        if chapterKey in config:
-            config[chapterKey]["roomNames"] = chapterRooms
-
-    config["dw_invItems"] = inventoryItems
-
-    return config
-
-
-def loadUserConfig() -> Dict[str, Any]:
-    """Loads the user config from user_config.json and sets the environment variables"""
-    with open(os.path.join(os.environ["DSM_PATH"], "user_config.json")) as f:
-        config = json.load(f)
-
-    os.environ["DSM_BKP_PATH"] = config["backupSaveLocation"]
-    localappdata = os.getenv("LOCALAPPDATA")
-    if config["activeSaveLocation"]["type"] == "default":
-        os.environ["DR_SAVE_PATH"] = os.path.join(
-            localappdata if localappdata else "", "DELTARUNE"
-        )
-    else:
-        os.environ["DR_SAVE_PATH"] = config["activeSaveLocation"]["path"]
-    if "launchData" not in config:
-        os.environ["DR_EXE_PATH"] = "NOT_SET"
-    else:
-        if config["launchData"]["type"] == "steam":
-            os.environ["DR_EXE_PATH"] = "VIA_STEAM"
-        if config["launchData"]["type"] == "custom":
-            os.environ["DR_EXE_PATH"] = config["launchData"]["path"]
-    return config
-
-
-def deepMerge(base: dict, override: dict) -> dict:
-    """Recursively merge override into base."""
-    result = base.copy()
-
-    for key, value in override.items():
-        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-            result[key] = deepMerge(result[key], value)
-        else:
-            result[key] = value
-
-    return result
-
-
-def setUpDirectories(appConfig: Dict[str, Any]) -> None:
-    """Sets up the chapter directories in the backup path"""
-    for i in range(appConfig["maximumChapter"]):
-        if not os.path.exists(os.path.join(os.environ["DSM_BKP_PATH"], f"CH{i + 1}")):
-            os.mkdir(os.path.join(os.environ["DSM_BKP_PATH"], f"CH{i + 1}"))
 
 
 class App(Tk):
@@ -501,7 +375,7 @@ class App(Tk):
 
 if __name__ == "__main__":
     print("Starting DELTARUNE Save Manager...")
-    valid = validateFiles()
+    valid = validateFiles(runningDir, killSplash)
     if valid:
         appConfig = loadAppConfig()
         userConfig = loadUserConfig()

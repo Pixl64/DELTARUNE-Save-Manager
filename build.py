@@ -1,6 +1,6 @@
 import os
 
-from filemanager import copyFile
+from src.file_utils import copyFile
 
 fp = os.path.dirname(os.path.abspath(__file__))
 buildPath = os.path.join(fp, "build")
