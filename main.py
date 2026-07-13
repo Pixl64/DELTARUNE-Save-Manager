@@ -37,13 +37,11 @@ from tkinter.messagebox import (
 from filemanager import backupSave, copyFile, restoreSave
 from src.popup import BackupCreatePopup, FirstTimeSetup, GameSelectPopup, SettingsPopup
 from src.save_editor.saveedit import SaveFileEdit
-from src.widgets import (
-    ActiveFrame,
-    BackupFrame,
-    ChapterSelectFrame,
-    RightButtonBox,
-    setWindowIcon,
-)
+from src.utils import setWindowIcon
+from src.widgets.w_active_frame import ActiveFrame
+from src.widgets.w_backup_frame import BackupFrame
+from src.widgets.w_buttonbox import RightButtonBox
+from src.widgets.w_chapter_frame import ChapterSelectFrame
 
 # Global variables
 os.environ["DSM_PATH"] = runningDir

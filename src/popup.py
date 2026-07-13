@@ -5,12 +5,12 @@ from tkinter.constants import LEFT, NW, TOP
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
-from src.widgets import (
+from src.utils import setWindowIcon
+from src.widgets.w_backup_frame import BackupFrame
+from src.widgets.w_selectors import (
     ActiveSaveLocationSelectorFrame,
-    BackupFrame,
     BackupSaveLocationSelectorFrame,
     GameSelectSelectorFrame,
-    setWindowIcon,
 )
 
 
