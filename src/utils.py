@@ -1,12 +1,8 @@
 import configparser
 import os
 import re
-import tempfile
-from tkinter import Tk
 from tkinter.filedialog import askdirectory, askopenfilename
 from typing import Dict
-
-from src.file_utils import copyFile
 
 # Maps item tag names to categories used in `dw_invItems`
 CATEGORY_MAP = {
@@ -155,17 +151,6 @@ def filter_and_group_items_by_chapter(
         filtered[ch].sort(key=lambda x: x[0])
 
     return dict(sorted(filtered.items()))
-
-
-def setWindowIcon(window: Tk):
-    """Sets the window icon to the icon.ico file in the data directory"""
-    # Copy the icon to a temporary directory to avoid issues with tkinter's iconbitmap
-    # This is necessary because tkinter's iconbitmap does not work with frozen executables
-    with tempfile.TemporaryDirectory("DSM") as tempDir:
-        iconSrc = os.path.join(os.environ["DSM_DATA_PATH"], "icon.ico")
-        iconTmp = os.path.join(tempDir, "icon_temp.ico")
-        copyFile(iconSrc, iconTmp)
-        window.iconbitmap(iconTmp)
 
 
 def createCutPath(path: str, entryWidth: int):

@@ -1,4 +1,3 @@
-import ctypes
 import json
 import os
 from tkinter import LabelFrame, Tk
@@ -14,12 +13,11 @@ from typing import Any, Dict
 
 from src.config_load import loadAppConfig, loadUserConfig
 from src.file_utils import setUpDirectories
+from src.gui_utils import launchGame, set_window_middle, setWindowIcon
 from src.popup.backup_create import BackupCreatePopup
-from src.popup.game_select import GameSelectPopup
 from src.popup.settings import SettingsPopup
 from src.save_backup_restore import backupSave, restoreSave
 from src.save_editor.saveedit import SaveFileEdit
-from src.utils import setWindowIcon
 from src.widgets.w_active_frame import ActiveFrame
 from src.widgets.w_backup_frame import BackupFrame
 from src.widgets.w_buttonbox import RightButtonBox
@@ -40,8 +38,8 @@ class App(Tk):
         self.userConfig = userConfig
         self.appConfig = appConfig
 
-        self.set_window_middle(
-            self.size[0], self.size[1]
+        set_window_middle(
+            self, self.size[0], self.size[1]
         )  # Set the window to the middle of the screen
         self.protocol(
             "WM_DELETE_WINDOW", self.exit
@@ -69,7 +67,7 @@ class App(Tk):
             backup_command=self.backupSaveCommand,
             restore_command=self.restoreSaveCommand,
             settings_command=self.showSettings,
-            launch_command=self.launchGame,
+            launch_command=launchGame,
             delete_save_command=self.deleteSave,
             edit_save_command=self.editSave,
             download_example_saves_command=lambda: showinfo(
@@ -82,13 +80,6 @@ class App(Tk):
         self.buttonBox.pack(
             side=LEFT, anchor=NW, padx=5, pady=5, fill=BOTH, expand=True
         )
-
-    def set_window_middle(self, width: int, height: int) -> None:
-        user32 = ctypes.windll.user32
-        screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-        middle = screensize[0] // 2, screensize[1] // 2
-        add = middle[0] - width // 2, middle[1] - height // 2
-        self.geometry(f"{width}x{height}+{add[0]}+{add[1]}")
 
     def chapterChange(self, chapter: int) -> None:
         self.activeSaves.updateToChapter(chapter)
@@ -219,42 +210,6 @@ class App(Tk):
         setUpDirectories(self.appConfig)
         self.chapterChange(currentChapter)  # Update the chapter select frame
 
-    def launchGame(self) -> None:
-        if os.environ["DR_EXE_PATH"] == "NOT_SET":
-            popup = GameSelectPopup(self, title="Select Game", initialDir="C:\\")
-            if not popup.result:
-                return
-
-            # Save the path to user_config.json
-            with open(
-                os.path.join(os.environ["DSM_PATH"], "user_config.json"), "r"
-            ) as f:
-                userConfig = json.load(f)
-            userConfig["launchData"] = popup.result["launchData"]
-            with open(
-                os.path.join(os.environ["DSM_PATH"], "user_config.json"), "w"
-            ) as f:
-                json.dump(userConfig, f, indent=4)
-
-            loadUserConfig()  # Reload user config to update the environment variable
-
-        if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
-            os.system(f"start steam://rungameid/{self.appConfig['appID']}")
-            return
-        if not os.path.exists(os.environ["DR_EXE_PATH"]):
-            showerror(
-                title="Error",
-                message="Game executable path does not exist. Please reset it in the settings.",
-            )
-            return
-        else:
-            exe_path = os.environ["DR_EXE_PATH"]
-
-            # Change running directory to where the deltarune executable is otherwise it won't get past chapter select
-            os.chdir(os.path.dirname(os.environ["DR_EXE_PATH"]))
-            os.startfile(f'"{exe_path}"')
-            os.chdir(os.environ["DSM_PATH"])
-
     def editSave(self) -> None:
         # Get currently selected save slot and chapter
         currentSave = self.activeSaves.getSelectedSaveSlot()
@@ -344,7 +299,7 @@ class App(Tk):
                     if confirmSteamOpen is None:
                         return
                     if confirmSteamOpen:
-                        self.launchGame()
+                        launchGame(self, self.appConfig)
                         showinfo(
                             title="Opening Game",
                             message="Opening the game to ensure the save is deleted. Please Press OK to continue when the game is open.",
