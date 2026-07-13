@@ -41,13 +41,11 @@ class FirstTimeSetup(Dialog):
         self.backupSaveFrame = BackupSaveLocationSelectorFrame(
             self.mainFrame,
             self.initialDir,
-            text="Backup Save Location",
             entryWidth=self.entryWidth,
         )
         self.activeSaveFrame = ActiveSaveLocationSelectorFrame(
             self.mainFrame,
             self.initialDir,
-            text="Active Save Location",
             entryWidth=self.entryWidth,
         )
 
@@ -112,7 +110,6 @@ class GameSelectPopup(Dialog):
         self.gameSelectFrame = GameSelectSelectorFrame(
             self.mainFrame,
             self.initialDir,
-            text="Game Save Location",
             entryWidth=self.entryWidth,
         )
         self.descriptionLabel.pack(side=TOP, anchor=NW, padx=5, pady=5)
@@ -162,19 +159,16 @@ class SettingsPopup(Dialog):
         self.backupSaveFrame = BackupSaveLocationSelectorFrame(
             self.mainFrame,
             self.initialDir,
-            text="Backup Save Location",
             entryWidth=self.entryWidth,
         )
         self.activeSaveFrame = ActiveSaveLocationSelectorFrame(
             self.mainFrame,
             self.initialDir,
-            text="Active Save Location",
             entryWidth=self.entryWidth,
         )
         self.gameSelectFrame = GameSelectSelectorFrame(
             self.mainFrame,
             self.initialDir,
-            text="Game Executable Location",
             entryWidth=self.entryWidth,
         )
         self.backupSaveFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)

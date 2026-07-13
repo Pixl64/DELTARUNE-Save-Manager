@@ -13,6 +13,7 @@ class PathSelectorFrame(LabelFrame):
         picker,
         pickerTitle: str,
         entryWidth: int = 40,
+        picker_kwargs=None,
         **kwargs,
     ):
         super().__init__(parent, **kwargs)
@@ -23,6 +24,7 @@ class PathSelectorFrame(LabelFrame):
         # Function used to open the picker
         self._picker = picker
         self._pickerTitle = pickerTitle
+        self._picker_kwargs = picker_kwargs or {}
 
         self.selectedPath = ""
 
