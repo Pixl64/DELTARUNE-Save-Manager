@@ -1,217 +1,212 @@
 from tkinter import Button, Entry, Frame, IntVar, LabelFrame, Radiobutton, StringVar
-from tkinter.constants import DISABLED, NORMAL, N, W
+from tkinter.constants import DISABLED, NORMAL, W
 
 from src.utils import createCutPath, openFilePicker, openFolderPicker
 
 
-class BackupSaveLocationSelectorFrame(LabelFrame):
-    def __init__(self, parent, initialDir: str, *args, entryWidth: int = 40, **kwargs):
-        super().__init__(parent, *args, **kwargs)
+class PathSelectorFrame(LabelFrame):
+    def __init__(
+        self,
+        parent,
+        *,
+        initialDir: str,
+        picker,
+        pickerTitle: str,
+        entryWidth: int = 40,
+        **kwargs,
+    ):
+        super().__init__(parent, **kwargs)
 
-        self.entryWidth = entryWidth
         self.initialDir = initialDir
+        self.entryWidth = entryWidth
 
-        self.dirDisplay = StringVar(value="[Nothing Selected]")
-        self.saveDir = ""
-        self.dirEntry = Entry(
-            self, width=self.entryWidth, textvariable=self.dirDisplay, state=DISABLED
+        # Function used to open the picker
+        self._picker = picker
+        self._pickerTitle = pickerTitle
+
+        self.selectedPath = ""
+
+        self.pathDisplay = StringVar(value="[Nothing Selected]")
+
+        self.entryFrame = Frame(self)
+
+        self.pathEntry = Entry(
+            self.entryFrame,
+            width=self.entryWidth,
+            textvariable=self.pathDisplay,
+            state=DISABLED,
         )
-        self.selectButton = Button(self, text="Select", command=self.selectBackupFolder)
-        self.dirEntry.grid(column=0, row=0, padx=(5, 2.5), pady=(0, 5))
+
+        self.selectButton = Button(
+            self.entryFrame,
+            text="Select",
+            command=self.selectPath,
+        )
+
+        self.pathEntry.grid(column=0, row=0, padx=(5, 2.5), pady=(0, 5))
         self.selectButton.grid(column=1, row=0, padx=(2.5, 5), pady=(0, 5))
 
-    def selectBackupFolder(self):
-        result = openFolderPicker(
-            "Select the backup save location: ",
+        self.entryFrame.pack()
+
+    def selectPath(self):
+        result = self._picker(
+            self._pickerTitle,
             initialDir=self.initialDir,
             entryWidth=self.entryWidth,
         )
+
         if not result:
             return
-        self.saveDir = result[0]
-        self.dirDisplay.set(result[1])
 
-    def getValue(self):
-        return self.saveDir
+        self.selectedPath = result[0]
+        self.pathDisplay.set(result[1])
 
-    def setValue(self, value: str):
+    def getPath(self):
+        return self.selectedPath
+
+    def setPath(self, value: str):
         if not value:
             return
-        self.saveDir = value
-        self.dirDisplay.set(createCutPath(value, self.entryWidth))
+
+        self.selectedPath = value
+        self.pathDisplay.set(createCutPath(value, self.entryWidth))
+
+    def enableSelection(self):
+        self.selectButton.config(state=NORMAL)
+
+    def disableSelection(self):
+        self.selectButton.config(state=DISABLED)
 
 
-class ActiveSaveLocationSelectorFrame(LabelFrame):
-    def __init__(self, parent, initialDir: str, *args, entryWidth: int = 40, **kwargs):
-        super().__init__(parent, *args, **kwargs)
+class RadioPathSelectorFrame(PathSelectorFrame):
+    def __init__(
+        self,
+        parent,
+        *,
+        initialDir,
+        picker,
+        pickerTitle,
+        defaultText,
+        customText,
+        defaultType,
+        entryWidth=40,
+        picker_kwargs=None,
+        **kwargs,
+    ):
+        super().__init__(
+            parent,
+            initialDir=initialDir,
+            picker=picker,
+            pickerTitle=pickerTitle,
+            entryWidth=entryWidth,
+            picker_kwargs=picker_kwargs,
+            **kwargs,
+        )
 
-        self.entryWidth = entryWidth
-        self.initialDir = initialDir
+        self.defaultType = defaultType
 
-        # Radio buttons to select option 1, use the default appdata location (most people should use this).
         self.selectedOption = IntVar()
-        self.defaultLocation = Radiobutton(
+
+        self.defaultRadio = Radiobutton(
             self,
-            text="Default ( %localappdata%\\DELTARUNE )",
+            text=defaultText,
             variable=self.selectedOption,
             value=1,
             command=self.sel,
         )
-        self.defaultLocation.grid(row=1, sticky=W)
 
-        # Radio buttons to select option 2, use a custom appdata location (most people won't use this).
-        self.customLocation = Radiobutton(
+        self.customRadio = Radiobutton(
             self,
-            text="Custom Location",
+            text=customText,
             variable=self.selectedOption,
             value=2,
             command=self.sel,
         )
-        self.customLocation.grid(row=2, sticky=W)
 
-        self.entryFrame = Frame(self)
-        self.dirDisplay = StringVar(value="[Nothing Selected]")
-        self.saveDir = ""
-        self.dirEntry = Entry(
-            self.entryFrame, textvariable=self.dirDisplay, width=self.entryWidth
-        )
-        self.selectButton = Button(
-            self.entryFrame, text="Select", command=self.selectActiveFolder
-        )
-        self.dirEntry.grid(column=0, row=0, padx=(5, 2.5), pady=(0, 5))
-        self.selectButton.grid(column=1, row=0, padx=(2.5, 5), pady=(0, 5))
-        self.entryFrame.grid(row=3, sticky=N)
+        self.defaultRadio.pack(anchor=W)
+        self.customRadio.pack(anchor=W)
 
-        # Set the default option to 1
-        self.defaultLocation.invoke()
+        # Move the inherited entry frame underneath the radio buttons
+        self.entryFrame.pack_forget()
+        self.entryFrame.pack()
 
-    def selectActiveFolder(self):
-        result = openFolderPicker(
-            "Select the custom active save location: ",
-            initialDir=self.initialDir,
-            entryWidth=self.entryWidth,
-        )
-        if not result:
-            return
-        self.saveDir = result[0]
-        self.dirDisplay.set(result[1])
+        self.defaultRadio.invoke()
 
-    # This runs whenever a radiobutton is pressed
     def sel(self):
-        # Get the selected option
-        match self.selectedOption.get():
-            # If the option is 1, disable the file select button and entry
-            case 1:
-                self.selectButton.config(state=DISABLED)
-                self.dirEntry.config(state=DISABLED)
-            # If the option is 2, enable the file select button and entry
-            case 2:
-                self.selectButton.config(state=NORMAL)
-                self.dirEntry.config(state=DISABLED)
+        if self.selectedOption.get() == 1:
+            self.disableSelection()
+        else:
+            self.enableSelection()
 
     def getValue(self):
-        match self.selectedOption.get():
-            case 1:
-                return {"type": "default"}
-            case 2:
-                return {"type": "custom", "path": self.saveDir}
-            case _:
-                return {"type": "default"}
+        if self.selectedOption.get() == 1:
+            return {"type": self.defaultType}
 
-    def setValue(self, value: dict):
+        return {
+            "type": "custom",
+            "path": self.getPath(),
+        }
+
+    def setValue(self, value):
         if not value:
             return
 
-        if value["type"] == "default":
-            self.defaultLocation.invoke()
+        if value["type"] == self.defaultType:
+            self.defaultRadio.invoke()
         elif value["type"] == "custom":
-            self.customLocation.invoke()
-            self.saveDir = value["path"]
-            self.dirDisplay.set(createCutPath(value["path"], self.entryWidth))
+            self.customRadio.invoke()
+            self.setPath(value["path"])
 
 
-class GameSelectSelectorFrame(LabelFrame):
-    def __init__(self, parent, initialDir: str, *args, entryWidth: int = 40, **kwargs):
-        super().__init__(parent, *args, **kwargs)
-
-        self.entryWidth = entryWidth
-        self.initialDir = initialDir
-
-        # Radio buttons to select option 1, open the game by using Steam.
-        self.selectedOption = IntVar()
-        self.defaultLocation = Radiobutton(
-            self,
-            text="Use Steam Link",
-            variable=self.selectedOption,
-            value=1,
-            command=self.sel,
+class BackupSaveLocationSelectorFrame(PathSelectorFrame):
+    def __init__(self, parent, initialDir, **kwargs):
+        super().__init__(
+            parent,
+            initialDir=initialDir,
+            picker=openFolderPicker,
+            pickerTitle="Select the backup save location:",
+            text="Backup Save Location",
+            **kwargs,
         )
-        self.defaultLocation.grid(row=1, sticky=W)
-
-        # Radio buttons to select option 2, open the game by directly running the file.
-        self.customLocation = Radiobutton(
-            self,
-            text="Custom Location",
-            variable=self.selectedOption,
-            value=2,
-            command=self.sel,
-        )
-        self.customLocation.grid(row=2, sticky=W)
-        self.entryFrame = Frame(self)
-        self.exeDisplay = StringVar(value="[Nothing Selected]")
-        self.exePath = ""
-        self.exeEntry = Entry(
-            self.entryFrame, textvariable=self.exeDisplay, width=self.entryWidth
-        )
-        self.selectButton = Button(
-            self.entryFrame, text="Select", command=self.selectGameExecutable
-        )
-        self.exeEntry.grid(column=0, row=0, padx=(5, 2.5), pady=(0, 5))
-        self.selectButton.grid(column=1, row=0, padx=(2.5, 5), pady=(0, 5))
-        self.entryFrame.grid(row=3, sticky=N)
-
-        # Set the default option to 1
-        self.defaultLocation.invoke()
-
-    def selectGameExecutable(self):
-        result = openFilePicker(
-            "Select the custom game executable location: ",
-            initialDir=self.initialDir,
-            entryWidth=self.entryWidth,
-            filetypes=[("Executable Files", "*.exe"), ("All Files", "*.*")],
-        )
-        if not result:
-            return
-        self.exePath = result[0]
-        self.exeDisplay.set(result[1])
-
-    # This runs whenever a radiobutton is pressed
-    def sel(self):
-        # Get the selected option
-        match self.selectedOption.get():
-            # If the option is 1, disable the file select button and entry
-            case 1:
-                self.selectButton.config(state=DISABLED)
-                self.exeEntry.config(state=DISABLED)
-            # If the option is 2, enable the file select button and entry
-            case 2:
-                self.selectButton.config(state=NORMAL)
-                self.exeEntry.config(state=DISABLED)
 
     def getValue(self):
-        match self.selectedOption.get():
-            case 1:
-                return {"type": "steam"}
-            case 2:
-                return {"type": "custom", "path": self.exePath}
+        return self.getPath()
 
-    def setValue(self, value: dict):
-        if not value:
-            return
+    def setValue(self, value):
+        self.setPath(value)
 
-        if value["type"] == "steam":
-            self.defaultLocation.invoke()
-        elif value["type"] == "custom":
-            self.customLocation.invoke()
-            self.exePath = value["path"]
-            self.exeDisplay.set(createCutPath(value["path"], self.entryWidth))
+
+class ActiveSaveLocationSelectorFrame(RadioPathSelectorFrame):
+    def __init__(self, parent, initialDir, **kwargs):
+        super().__init__(
+            parent,
+            initialDir=initialDir,
+            picker=openFolderPicker,
+            pickerTitle="Select the custom active save location:",
+            defaultText="Default (%localappdata%\\DELTARUNE)",
+            customText="Custom Location",
+            defaultType="default",
+            text="Active Save Location",
+            **kwargs,
+        )
+
+
+class GameSelectSelectorFrame(RadioPathSelectorFrame):
+    def __init__(self, parent, initialDir, **kwargs):
+        super().__init__(
+            parent,
+            initialDir=initialDir,
+            picker=openFilePicker,
+            pickerTitle="Select the custom game executable:",
+            defaultText="Use Steam Link",
+            customText="Custom Location",
+            defaultType="steam",
+            picker_kwargs={
+                "filetypes": [
+                    ("Executable Files", "*.exe"),
+                    ("All Files", "*.*"),
+                ]
+            },
+            text="Game Launch",
+            **kwargs,
+        )
