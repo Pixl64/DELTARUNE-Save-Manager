@@ -35,7 +35,10 @@ from tkinter.messagebox import (
 )
 
 from filemanager import backupSave, copyFile, restoreSave
-from src.popup import BackupCreatePopup, FirstTimeSetup, GameSelectPopup, SettingsPopup
+from src.popup.backup_create import BackupCreatePopup
+from src.popup.first_time_setup import FirstTimeSetup
+from src.popup.game_select import GameSelectPopup
+from src.popup.settings import SettingsPopup
 from src.save_editor.saveedit import SaveFileEdit
 from src.utils import setWindowIcon
 from src.widgets.w_active_frame import ActiveFrame
