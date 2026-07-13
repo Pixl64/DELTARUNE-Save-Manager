@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from tkinter import Toplevel, Label, RAISED
+from tkinter import RAISED, Label, Toplevel
 from tkinter.constants import END
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from src.save_editor.drag.drag_utils import can_equip
 
@@ -138,7 +138,6 @@ class DragManager:
                 index = actualListbox.nearest(relativeY)
 
                 if 0 <= index < actualListbox.size():
-
                     targetId = actualListbox.getItemId(index)
                     if targetId is None:
                         self._setDragStateColor("invalid")
@@ -220,7 +219,7 @@ class DragManager:
             and not self.drag.listbox.allowInternalSwap
         ):
             return False
-        
+
         if not self._canEquipSwap(
             self.drag.listbox,
             self.drag.index,
@@ -339,7 +338,6 @@ class DragManager:
             listbox.clearItemHighlights()
 
             for i in range(listbox.size()):
-
                 targetId = listbox.getItemId(i)
 
                 if targetId is None:
@@ -347,13 +345,11 @@ class DragManager:
 
                 if self._canDrop(listbox, i):
                     listbox.setItemHighlight(
-                        i,
-                        self.colors.get("dropHighlight", "lightgreen")
+                        i, self.colors.get("dropHighlight", "lightgreen")
                     )
                 else:
                     listbox.setItemHighlight(
-                        i,
-                        self.colors.get("invalidHighlight", "lightcoral")
+                        i, self.colors.get("invalidHighlight", "lightcoral")
                     )
 
     def _clearAllHighlights(self) -> None:

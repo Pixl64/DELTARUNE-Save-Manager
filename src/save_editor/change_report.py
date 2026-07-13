@@ -8,9 +8,7 @@ def add_change(changes, category, label, old, new, dw_invItems=None, item_type=N
             old = get_item_name(dw_invItems, old, item_type)
             new = get_item_name(dw_invItems, new, item_type)
 
-        changes[category].append(
-            f'{label}: "{old}" → "{new}"'
-        )
+        changes[category].append(f'{label}: "{old}" → "{new}"')
 
 
 def generateCategorizedChangeReport(original, current, dw_invItems, chapterData):
@@ -21,26 +19,21 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
         "Weapon & Armor Inventory Changes": [],
         "Key Item Changes": [],
         "Item & Storage Changes": [],
-        "Save Stat Changes": []
+        "Save Stat Changes": [],
     }
 
     # Party equipment changes
-    equipment_types = {
-        "weapon": "weapon",
-        "armor1": "armor",
-        "armor2": "armor"
-    }
-    
+    equipment_types = {"weapon": "weapon", "armor1": "armor", "armor2": "armor"}
+
     # Save stats
     save_stats = {
         "darkDollar": "Dark Dollars",
         "floweryDollars": "Flowery Dollars",
         "pinkCoins": "Pink Coins",
-        "points": "Points"
+        "points": "Points",
     }
 
     for character in chapterData["dw_partyMemberLocation"].keys():
-
         for slot, item_type in equipment_types.items():
             add_change(
                 changes,
@@ -49,7 +42,7 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
                 original["party"][character][slot],
                 current["party"][character][slot],
                 dw_invItems,
-                item_type
+                item_type,
             )
 
         # HP changes
@@ -58,7 +51,7 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
             "Save Stat Changes",
             f"{character.capitalize()} Current HP",
             original["party"][character].get("currentHP"),
-            current["party"][character].get("currentHP")
+            current["party"][character].get("currentHP"),
         )
 
         add_change(
@@ -66,7 +59,7 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
             "Save Stat Changes",
             f"{character.capitalize()} Max HP",
             original["party"][character].get("maxHP"),
-            current["party"][character].get("maxHP")
+            current["party"][character].get("maxHP"),
         )
 
     # Weapon inventory
@@ -74,11 +67,11 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
         add_change(
             changes,
             "Weapon & Armor Inventory Changes",
-            f"Weapon Slot {i+1}",
+            f"Weapon Slot {i + 1}",
             original["weapons"][i],
             current["weapons"][i],
             dw_invItems,
-            "weapon"
+            "weapon",
         )
 
     # Armor inventory
@@ -86,11 +79,11 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
         add_change(
             changes,
             "Weapon & Armor Inventory Changes",
-            f"Armor Slot {i+1}",
+            f"Armor Slot {i + 1}",
             original["armor"][i],
             current["armor"][i],
             dw_invItems,
-            "armor"
+            "armor",
         )
 
     # Key items
@@ -98,11 +91,11 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
         add_change(
             changes,
             "Key Item Changes",
-            f"Key Item Slot {i+1}",
+            f"Key Item Slot {i + 1}",
             original["keyItems"][i],
             current["keyItems"][i],
             dw_invItems,
-            "keyItem"
+            "keyItem",
         )
 
     # Items
@@ -110,11 +103,11 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
         add_change(
             changes,
             "Item & Storage Changes",
-            f"Item Slot {i+1}",
+            f"Item Slot {i + 1}",
             original["items"][i],
             current["items"][i],
             dw_invItems,
-            "item"
+            "item",
         )
 
     # Storage
@@ -123,20 +116,16 @@ def generateCategorizedChangeReport(original, current, dw_invItems, chapterData)
             add_change(
                 changes,
                 "Item & Storage Changes",
-                f"Storage Slot {i+1}",
+                f"Storage Slot {i + 1}",
                 original["storage"][i],
                 current["storage"][i],
                 dw_invItems,
-                "item"
+                "item",
             )
 
     for key, label in save_stats.items():
         add_change(
-            changes,
-            "Save Stat Changes",
-            label,
-            original.get(key),
-            current.get(key)
+            changes, "Save Stat Changes", label, original.get(key), current.get(key)
         )
 
     return changes
