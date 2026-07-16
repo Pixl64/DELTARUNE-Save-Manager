@@ -1,7 +1,7 @@
 import os
 import subprocess
 from tkinter import Button, Frame, Label, LabelFrame, Spinbox, StringVar
-from tkinter.constants import DISABLED, EW, LEFT, RIGHT, X
+from tkinter.constants import DISABLED, EW, LEFT, NW, RIGHT, X
 from tkinter.messagebox import showerror, showinfo
 from typing import Callable
 
@@ -237,11 +237,11 @@ class ChapterLaunchPatch(LabelFrame):
         self.patchDescriptionLabel = Label(
             self,
             text="Patch the /mus files to allow launching chapters directly. Only required if you are using the Steam version of DELTARUNE.",
-            wraplength=350,
+            wraplength=300,
             justify=LEFT,
         )
         self.patchDescriptionLabel.grid(
-            row=0, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2
+            row=0, column=0, padx=5, pady=2.5, sticky=NW, columnspan=2
         )
 
         self.grid_columnconfigure(0, weight=1)
