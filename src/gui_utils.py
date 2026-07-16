@@ -2,15 +2,14 @@ import ctypes
 import json
 import os
 import tempfile
-from tkinter import Tk
-from typing import Optional
+from tkinter import Tk, Toplevel
 
 from src.config_load import loadUserConfig
 from src.file_utils import copyFile, launch_game
 from src.popup.game_select import GameSelectPopup
 
 
-def setWindowIcon(window: Tk):
+def setWindowIcon(window: Tk | Toplevel) -> None:
     """Sets the window icon to the icon.ico file in the data directory"""
     # Copy the icon to a temporary directory to avoid issues with tkinter's iconbitmap
     # This is necessary because tkinter's iconbitmap does not work with frozen executables

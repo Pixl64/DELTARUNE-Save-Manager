@@ -5,6 +5,7 @@ from tkinter.constants import NW, TOP, X
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
+from src.gui_utils import setWindowIcon
 from src.widgets.w_buttonbox import ChapterLaunchPatch, OpenFolderButtonBox
 from src.widgets.w_selectors import (
     ActiveSaveLocationSelectorFrame,
@@ -25,6 +26,7 @@ class SettingsPopup(Dialog):
     # Function to create the body of the dialog
     def body(self, master):
         self.winfo_toplevel().resizable(False, False)
+        setWindowIcon(self)
         self.minsize(width=250, height=100)
 
         self.mainFrame = Frame(master)

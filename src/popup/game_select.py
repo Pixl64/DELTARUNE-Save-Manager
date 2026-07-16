@@ -4,6 +4,7 @@ from tkinter.constants import LEFT, NW, TOP
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
+from src.gui_utils import setWindowIcon
 from src.widgets.w_selectors import (
     GameSelectSelectorFrame,
 )
@@ -20,6 +21,7 @@ class GameSelectPopup(Dialog):
 
     # Function to create the body of the dialog
     def body(self, master):
+        setWindowIcon(self)
         self.winfo_toplevel().resizable(False, False)
         self.minsize(width=250, height=100)
 

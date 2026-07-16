@@ -22,6 +22,7 @@ class FirstTimeSetup(Dialog):
 
     # Function to create the body of the dialog
     def body(self, master):
+        setWindowIcon(self)
         setWindowIcon(self.winfo_toplevel())  # pyright: ignore[reportArgumentType]
         self.winfo_toplevel().resizable(False, False)
         self.minsize(width=250, height=100)
