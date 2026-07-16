@@ -47,7 +47,7 @@ def launchGame(window: Tk, appConfig: dict) -> None:
         loadUserConfig()  # Reload user config to update the environment variable
 
     if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
-        os.system(f"start steam://rungameid/{appConfig['appID']}")
+        os.startfile(f"steam://rungameid/{appConfig['appID']}")
         return
     if not os.path.exists(os.environ["DR_EXE_PATH"]):
         showerror(
