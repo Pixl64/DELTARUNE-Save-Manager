@@ -3,12 +3,10 @@ import json
 import os
 import tempfile
 from tkinter import Tk
-from tkinter.messagebox import (
-    showerror,
-)
+from typing import Optional
 
 from src.config_load import loadUserConfig
-from src.file_utils import copyFile
+from src.file_utils import copyFile, launch_game
 from src.popup.game_select import GameSelectPopup
 
 
@@ -31,7 +29,12 @@ def set_window_middle(window: Tk, width: int, height: int) -> None:
     window.geometry(f"{width}x{height}+{add[0]}+{add[1]}")
 
 
-def launchGame(window: Tk, appConfig: dict) -> None:
+def ui_launchGame(
+    window: Tk,
+    appConfig: dict,
+    userConfig: dict,
+    chapter: Optional[int] = None,
+) -> None:
     if os.environ["DR_EXE_PATH"] == "NOT_SET":
         popup = GameSelectPopup(window)
         if not popup.result:
@@ -41,24 +44,12 @@ def launchGame(window: Tk, appConfig: dict) -> None:
         with open(os.path.join(os.environ["DSM_PATH"], "user_config.json"), "r") as f:
             userConfig = json.load(f)
         userConfig["launchData"] = popup.result["launchData"]
+        userConfig["runGameFollowsActiveChapter"] = popup.result.get(
+            "runGameFollowsActiveChapter", False
+        )
         with open(os.path.join(os.environ["DSM_PATH"], "user_config.json"), "w") as f:
             json.dump(userConfig, f, indent=4)
+        # Reload the userConfig from the file to ensure it is up to date
+        userConfig = loadUserConfig()
 
-        loadUserConfig()  # Reload user config to update the environment variable
-
-    if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
-        os.startfile(f"steam://rungameid/{appConfig['appID']}")
-        return
-    if not os.path.exists(os.environ["DR_EXE_PATH"]):
-        showerror(
-            title="Error",
-            message="Game executable path does not exist. Please reset it in the settings.",
-        )
-        return
-    else:
-        exe_path = os.environ["DR_EXE_PATH"]
-
-        # Change running directory to where the deltarune executable is otherwise it won't get past chapter select
-        os.chdir(os.path.dirname(os.environ["DR_EXE_PATH"]))
-        os.startfile(f'"{exe_path}"')
-        os.chdir(os.environ["DSM_PATH"])
+    launch_game(appConfig, userConfig, chapter)

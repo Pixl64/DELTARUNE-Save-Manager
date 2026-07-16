@@ -5,7 +5,7 @@ from tkinter.constants import NW, TOP, X
 from tkinter.messagebox import showerror
 from tkinter.simpledialog import Dialog
 
-from src.widgets.w_buttonbox import OpenFolderButtonBox
+from src.widgets.w_buttonbox import ChapterLaunchPatch, OpenFolderButtonBox
 from src.widgets.w_selectors import (
     ActiveSaveLocationSelectorFrame,
     BackupSaveLocationSelectorFrame,
@@ -47,10 +47,13 @@ class SettingsPopup(Dialog):
 
         self.openFolderButtonBox = OpenFolderButtonBox(self.mainFrame)
 
+        self.chapterLaunchPatch = ChapterLaunchPatch(self.mainFrame)
+
         self.backupSaveFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)
         self.activeSaveFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)
         self.gameSelectFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)
         self.openFolderButtonBox.pack(side=TOP, anchor=NW, padx=5, pady=5, fill=X)
+        self.chapterLaunchPatch.pack(side=TOP, anchor=NW, padx=5, pady=5, fill=X)
 
         # Load the current settings from user_config.json
         try:
@@ -62,6 +65,11 @@ class SettingsPopup(Dialog):
             self.activeSaveFrame.setValue(userConfig["activeSaveLocation"])
             if "launchData" in userConfig:
                 self.gameSelectFrame.setValue(userConfig["launchData"])
+            if "runGameFollowsActiveChapter" in userConfig:
+                self.gameSelectFrame.setFollowActiveChapter(
+                    userConfig["runGameFollowsActiveChapter"]
+                )
+
         except FileNotFoundError:
             showerror(
                 title="Error",
@@ -107,6 +115,7 @@ class SettingsPopup(Dialog):
             "backupSaveLocation": self.backupSaveFrame.getValue(),
             "activeSaveLocation": self.activeSaveFrame.getValue(),
             "launchData": self.gameSelectFrame.getValue(),
+            "runGameFollowsActiveChapter": self.gameSelectFrame.getFollowActiveChapter(),
         }
 
         # Load the current settings from user_config.json
@@ -122,6 +131,10 @@ class SettingsPopup(Dialog):
         userConfig["backupSaveLocation"] = self.result["backupSaveLocation"]
         userConfig["activeSaveLocation"] = self.result["activeSaveLocation"]
         userConfig["launchData"] = self.result["launchData"]
+        userConfig["hasSeenEditWarning"] = userConfig.get("hasSeenEditWarning", False)
+        userConfig["runGameFollowsActiveChapter"] = userConfig.get(
+            "runGameFollowsActiveChapter", False
+        )
 
         with open(os.path.join(os.environ["DSM_PATH"], "user_config.json"), "w") as f:
-            json.dump(self.result, f, indent=4)
+            json.dump(userConfig, f, indent=4)

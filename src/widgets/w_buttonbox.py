@@ -1,15 +1,24 @@
 import os
 import subprocess
-from tkinter import Button, LabelFrame
-from tkinter.constants import DISABLED, EW
-from tkinter.messagebox import showerror
+from tkinter import Button, Frame, Label, LabelFrame, Spinbox, StringVar
+from tkinter.constants import DISABLED, EW, LEFT, RIGHT, X
+from tkinter.messagebox import showerror, showinfo
 from typing import Callable
+
+from src.file_utils import (
+    get_deltarune_location,
+    get_steam_install_location,
+    link_music_to_chapters,
+    remove_music_links,
+)
 
 
 class RightButtonBox(LabelFrame):
     def __init__(
         self,
         parent,
+        userConfig: dict,
+        appConfig: dict,
         backup_command: Callable,
         restore_command: Callable,
         settings_command: Callable,
@@ -23,6 +32,14 @@ class RightButtonBox(LabelFrame):
         self.parent = parent
         self.config(text="Options")
 
+        self.appConfig = appConfig
+        self.chapter = 1
+
+        self.chapter_limits = (0, appConfig["maximumChapter"])  # (min, max)
+        self.runGameFollowsActiveChapter = userConfig.get(
+            "runGameFollowsActiveChapter", False
+        )
+
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
@@ -34,8 +51,35 @@ class RightButtonBox(LabelFrame):
         self.button3.grid(row=2, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
         self.button4 = Button(self, text="Settings", command=settings_command)
         self.button4.grid(row=3, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
-        self.button5 = Button(self, text="Launch Game", command=launch_command)
-        self.button5.grid(row=4, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
+
+        self.launch_chapter_value_sv = StringVar(value="1")
+
+        self.launch_chapter_value_sv.trace_add(
+            "write",
+            lambda *args: self._update_chapter(int(self.launch_chapter_value_sv.get())),
+        )
+
+        self.chapter_launch_frame = Frame(self)
+        self.button5 = Button(
+            self.chapter_launch_frame, text="Launch Game", command=launch_command
+        )
+        self.button5.pack(side=LEFT, fill=X, expand=True)
+
+        self.chapter_spinbox = Spinbox(
+            self.chapter_launch_frame,
+            from_=0,
+            to=self.chapter_limits[1],
+            width=1,
+            wrap=True,
+            textvariable=self.launch_chapter_value_sv,
+            state="readonly",
+        )
+        self.chapter_spinbox.pack(side=RIGHT, padx=1, ipady=4, ipadx=2)
+
+        self.chapter_launch_frame.grid(
+            row=4, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2
+        )
+
         self.button6 = Button(self, text="Edit Active Save", command=edit_save_command)
         self.button6.grid(row=5, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
         self.button8 = Button(
@@ -48,8 +92,50 @@ class RightButtonBox(LabelFrame):
         self.buttonExit = Button(self, text="Exit", command=exit_command)
         self.buttonExit.grid(row=7, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
 
+        # Set the initial chapter based on the userConfig
+        self.updateConfig(userConfig)
+
         # self.buttonTest = Button(self, text="Test", command=test_command)
         # self.buttonTest.grid(row=8, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2)
+
+    def updateSpinboxState(self):
+        if self.runGameFollowsActiveChapter:
+            self.chapter_spinbox.config(state="disabled")
+        else:
+            self.chapter_spinbox.config(state="readonly")
+
+    def _update_chapter(self, chapter: int) -> None:
+        if chapter < self.chapter_limits[0]:
+            chapter = self.chapter_limits[0]
+        elif chapter > self.chapter_limits[1]:
+            chapter = self.chapter_limits[1]
+
+        if chapter == 0:
+            self.button5.config(text="Launch Game")
+        else:
+            self.button5.config(text="Launch Chapter: ")
+
+        self.launch_chapter_value_sv.set(str(chapter))
+        self.chapter = chapter
+
+    def updateConfig(self, userConfig: dict):
+        self.runGameFollowsActiveChapter = userConfig.get(
+            "runGameFollowsActiveChapter", False
+        )
+
+        self.updateSpinboxState()
+
+        if self.runGameFollowsActiveChapter:
+            self._update_chapter(self.chapter)
+        else:
+            self._update_chapter(0)
+
+    def getChapter(self) -> int:
+        return self.chapter
+
+    def setChapter(self, chapter: int) -> None:
+        if self.runGameFollowsActiveChapter:
+            self._update_chapter(chapter)
 
 
 class OpenFolderButtonBox(LabelFrame):
@@ -122,7 +208,7 @@ class OpenFolderButtonBox(LabelFrame):
             return
 
         if gamePath == "VIA_STEAM":
-            steamPath = self.get_steam_install_location()
+            steamPath = get_steam_install_location()
             if steamPath is None:
                 showerror(
                     title="Error",
@@ -139,20 +225,48 @@ class OpenFolderButtonBox(LabelFrame):
                 message=f"Game Executable Location does not exist.\n{gamePath}",
             )
 
-    def get_steam_install_location(self):
-        try:
-            result = subprocess.run(
-                ["reg", "query", r"HKCU\Software\Valve\Steam", "/v", "SteamPath"],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
 
-            for line in result.stdout.splitlines():
-                if "SteamPath" in line:
-                    return line.split("REG_SZ")[-1].strip()
+class ChapterLaunchPatch(LabelFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.config(text="Chapter Launch Patch")
 
-        except subprocess.CalledProcessError:
-            return None
+        self.grid_columnconfigure(0, weight=1)
 
-        return None
+        self.patchDescriptionLabel = Label(
+            self,
+            text="Patch the /mus files to allow launching chapters directly. Only required if you are using the Steam version of DELTARUNE.",
+            wraplength=350,
+            justify=LEFT,
+        )
+        self.patchDescriptionLabel.grid(
+            row=0, column=0, padx=5, pady=2.5, sticky=EW, columnspan=2
+        )
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+
+        self.patchButton = Button(
+            self, text="Patch /mus files", command=self.patch_command
+        )
+        self.patchButton.grid(row=1, column=0, padx=5, pady=2.5, sticky=EW)
+
+        self.unPatchButton = Button(
+            self, text="Unpatch /mus files", command=self.unpatch_command
+        )
+        self.unPatchButton.grid(row=1, column=1, padx=5, pady=2.5, sticky=EW)
+
+    def patch_command(self):
+        res = link_music_to_chapters(get_deltarune_location())
+        showinfo(
+            title="Patch Result",
+            message=res,
+        )
+
+    def unpatch_command(self):
+        res = remove_music_links(get_deltarune_location())
+        showinfo(
+            title="Patch Result",
+            message=res,
+        )

@@ -1,9 +1,13 @@
 import json
 import os
+import re
 import shutil
+import stat
+import subprocess
 import sys
 from tkinter import Tk
-from typing import Any, Callable, Dict
+from tkinter.messagebox import askyesno, showerror
+from typing import Any, Callable, Dict, Optional
 
 
 def copyFile(src: str, dest: str):
@@ -36,6 +40,25 @@ def getCurrentWorkingDirectory() -> tuple[str, str, Callable[[], None]]:
     return runningDir, dataPath, killSplash
 
 
+def get_steam_install_location():
+    try:
+        result = subprocess.run(
+            ["reg", "query", r"HKCU\Software\Valve\Steam", "/v", "SteamPath"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        for line in result.stdout.splitlines():
+            if "SteamPath" in line:
+                return line.split("REG_SZ")[-1].strip()
+
+    except subprocess.CalledProcessError:
+        return None
+
+    return None
+
+
 def setUpDirectories(appConfig: Dict[str, Any]) -> None:
     """Sets up the chapter directories in the backup path"""
     for i in range(appConfig["maximumChapter"]):
@@ -63,6 +86,205 @@ def validateFiles(runningDir: str, killSplash: Callable) -> bool:
     return True
 
 
+def validateChapterRun(
+    dir: str, appConfig: dict, userConfig: Dict[str, Any], chapter: Optional[int]
+) -> bool:
+    """Validates that chapter music junctions exist when using chapter launching."""
+
+    chapterLimits = (1, appConfig["maximumChapter"])
+
+    for i in range(chapterLimits[0], chapterLimits[1] + 1):
+        mus_dir = os.path.join(dir, f"chapter{i}_windows", "mus")
+
+        if not is_link_or_junction(mus_dir):
+            return False
+
+    return True
+
+
 def constructSave(savePath: str, lines: list):
     with open(savePath, "w") as f:
         f.write("\n".join(lines))
+
+
+def is_link_or_junction(path):
+    """
+    Returns True if path is a symbolic link or Windows junction.
+    """
+    if os.path.islink(path):
+        return True
+
+    try:
+        attrs = os.lstat(path).st_file_attributes
+        return bool(attrs & stat.FILE_ATTRIBUTE_REPARSE_POINT)
+    except FileNotFoundError:
+        return False
+
+
+def link_music_to_chapters(root_dir):
+    """
+    Creates a 'mus' symlink inside every chapter*_windows folder
+    pointing to the root 'mus' folder.
+
+    Example:
+        root_dir/
+        ├── mus/
+        ├── chapter1_windows/
+        ├── chapter2_windows/
+        └── chapter3_windows/
+
+    Creates:
+        chapter1_windows/mus -> ../mus
+        chapter2_windows/mus -> ../mus
+        etc.
+    """
+
+    music_dir = os.path.join(root_dir, "mus")
+
+    if not os.path.isdir(music_dir):
+        raise FileNotFoundError(f"Music folder not found: {music_dir}")
+
+    chapter_pattern = re.compile(r"^chapter\d+_windows$")
+
+    count = 0
+    for name in os.listdir(root_dir):
+        chapter_path = os.path.join(root_dir, name)
+
+        if os.path.isdir(chapter_path) and chapter_pattern.match(name):
+            link_path = os.path.join(chapter_path, "mus")
+
+            # Already exists
+            if os.path.exists(link_path) or os.path.islink(link_path):
+                continue
+
+            # Create relative symlink
+
+            subprocess.run(["cmd", "/c", "mklink", "/J", link_path, music_dir])
+            count += 1
+
+    return f"Created {count} music links in chapter folders."
+
+
+def remove_music_links(root_dir):
+    """
+    Removes mus symlinks/junctions from every chapter*_windows folder.
+    Leaves real folders untouched.
+    """
+
+    chapter_pattern = re.compile(r"^chapter\d+_windows$")
+
+    count = 0
+    skipped = 0
+    failed = 0
+    for name in os.listdir(root_dir):
+        chapter_dir = os.path.join(root_dir, name)
+
+        if not (os.path.isdir(chapter_dir) and chapter_pattern.match(name)):
+            continue
+
+        music_link = os.path.join(chapter_dir, "mus")
+
+        if is_link_or_junction(music_link):
+            try:
+                os.rmdir(music_link)
+                count += 1
+            except OSError:
+                failed += 1
+
+        elif os.path.exists(music_link):
+            skipped += 1
+        else:
+            continue
+
+    return f"Removed {count} music links. Skipped {skipped} real folders. Failed to remove {failed} links."
+
+
+def get_deltarune_location() -> Optional[str]:
+    if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
+        steam_location = get_steam_install_location()
+        if not steam_location:
+            raise FileNotFoundError("Steam installation not found.")
+
+        deltarune_location = os.path.join(
+            steam_location, "steamapps", "common", "DELTARUNE"
+        )
+        if not os.path.exists(deltarune_location):
+            raise FileNotFoundError(
+                "DELTARUNE installation not found in the Steam library."
+            )
+
+        return deltarune_location
+    else:
+        if not os.path.exists(os.environ["DR_EXE_PATH"]):
+            raise FileNotFoundError(
+                f"Game executable path does not exist: {os.environ['DR_EXE_PATH']}"
+            )
+        return os.path.dirname(os.environ["DR_EXE_PATH"])
+
+
+def launch_game(appConfig: dict, userConfig: dict, chapter: Optional[int]) -> None:
+    if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
+        # Check if Steam is installed
+        steamLocation = get_steam_install_location()
+        if not steamLocation:
+            showerror(
+                title="Error",
+                message="Steam installation not found. Please ensure Steam is installed and try again.",
+            )
+            return
+
+        # Check if the game is installed in the Steam library
+        deltaruneLocation = os.path.join(
+            steamLocation, "steamapps", "common", "DELTARUNE"
+        )
+        if not os.path.exists(deltaruneLocation):
+            showerror(
+                title="Error",
+                message="DELTARUNE installation not found in the Steam library. Please ensure the game is installed and try again.",
+            )
+            return
+
+        # If the user has selected to launch a specific chapter, validate that the /mus folder exists for that chapter
+        if (
+            chapter is not None
+            and chapter > 0
+            and chapter <= appConfig["maximumChapter"]
+        ):
+            valid = validateChapterRun(
+                deltaruneLocation, appConfig, userConfig, chapter
+            )
+
+            if not valid:
+                if not askyesno(
+                    title="Error",
+                    message=f"Cannot launch chapter {chapter} because the /mus folder is not linked. Do you want to link the mus /folder to all chapters now? (This will modify your DELTARUNE installation. It is reversable in the settings.)",
+                    icon="error",
+                ):
+                    return
+
+                link_music_to_chapters(deltaruneLocation)
+
+            launchParameters = rf"//-game chapter{chapter}_windows\data.win launcher"
+        else:
+            launchParameters = ""
+
+        os.startfile(f"steam://run/{appConfig['appID']}{launchParameters}")
+        return
+    if not os.path.exists(os.environ["DR_EXE_PATH"]):
+        showerror(
+            title="Error",
+            message=f"Game executable path does not exist. \nPlease reset it in the settings.\n{os.environ['DR_EXE_PATH']}",
+        )
+        return
+    else:
+        exe_path = os.environ["DR_EXE_PATH"]
+
+        subprocess.Popen(
+            [
+                exe_path,
+                "-game",
+                "data.win",
+                "launcher",
+            ],
+            cwd=rf"{os.path.dirname(exe_path)}\chapter{chapter}_windows",
+        )

@@ -13,7 +13,7 @@ from typing import Any, Dict
 
 from src.config_load import loadAppConfig, loadUserConfig
 from src.file_utils import setUpDirectories
-from src.gui_utils import launchGame, set_window_middle, setWindowIcon
+from src.gui_utils import set_window_middle, setWindowIcon, ui_launchGame
 from src.popup.backup_create import BackupCreatePopup
 from src.popup.settings import SettingsPopup
 from src.save_backup_restore import backupSave, restoreSave
@@ -64,10 +64,12 @@ class App(Tk):
 
         self.buttonBox = RightButtonBox(
             self,
+            self.userConfig,
+            self.appConfig,
             backup_command=self.backupSaveCommand,
             restore_command=self.restoreSaveCommand,
             settings_command=self.showSettings,
-            launch_command=lambda: launchGame(self, self.appConfig),
+            launch_command=self.run_launch_game,
             delete_save_command=self.deleteSave,
             edit_save_command=self.editSave,
             download_example_saves_command=lambda: showinfo(
@@ -84,6 +86,7 @@ class App(Tk):
     def chapterChange(self, chapter: int) -> None:
         self.activeSaves.updateToChapter(chapter)
         self.backupSaves.setChapter(chapter)
+        self.buttonBox.setChapter(chapter)
 
     def backupSaveCommand(self) -> None:
         # Get the currently selected chapter
@@ -209,6 +212,21 @@ class App(Tk):
         self.userConfig = loadUserConfig()
         setUpDirectories(self.appConfig)
         self.chapterChange(currentChapter)  # Update the chapter select frame
+        self.buttonBox.updateConfig(self.userConfig)
+
+    def run_launch_game(self) -> None:
+        ui_launchGame(
+            self,
+            self.appConfig,
+            self.userConfig,
+            chapter=self.buttonBox.getChapter(),
+        )
+        self.userConfig = (
+            loadUserConfig()
+        )  # Reload the user config in case it was changed by the game
+        self.buttonBox.updateConfig(
+            self.userConfig
+        )  # Update the button box with the new config after launching the game
 
     def editSave(self) -> None:
         # Get currently selected save slot and chapter
@@ -299,7 +317,12 @@ class App(Tk):
                     if confirmSteamOpen is None:
                         return
                     if confirmSteamOpen:
-                        launchGame(self, self.appConfig)
+                        ui_launchGame(
+                            self,
+                            self.appConfig,
+                            self.userConfig,
+                            chapter=currentSave["chapter"],
+                        )
                         showinfo(
                             title="Opening Game",
                             message="Opening the game to ensure the save is deleted. Please Press OK to continue when the game is open.",

@@ -1,4 +1,13 @@
-from tkinter import Button, Entry, Frame, IntVar, LabelFrame, Radiobutton, StringVar
+from tkinter import (
+    Button,
+    Checkbutton,
+    Entry,
+    Frame,
+    IntVar,
+    LabelFrame,
+    Radiobutton,
+    StringVar,
+)
 from tkinter.constants import DISABLED, NORMAL, W
 
 from src.utils import createCutPath, openFilePicker, openFolderPicker
@@ -55,6 +64,7 @@ class PathSelectorFrame(LabelFrame):
             self._pickerTitle,
             initialDir=self.initialDir,
             entryWidth=self.entryWidth,
+            **self._picker_kwargs,
         )
 
         if not result:
@@ -212,3 +222,19 @@ class GameSelectSelectorFrame(RadioPathSelectorFrame):
             text="Game Launch",
             **kwargs,
         )
+
+        self.run_game_follows_active_chapter = IntVar(value=0)
+
+        self.run_game_check = Checkbutton(
+            self,
+            text="Run Game Follows Active Chapter",
+            variable=self.run_game_follows_active_chapter,
+        )
+
+        self.run_game_check.pack(anchor=W)
+
+    def setFollowActiveChapter(self, value: bool):
+        self.run_game_follows_active_chapter.set(int(value))
+
+    def getFollowActiveChapter(self) -> bool:
+        return bool(self.run_game_follows_active_chapter.get())

@@ -77,5 +77,6 @@ class FirstTimeSetup(Dialog):
             "backupSaveLocation": self.backupSaveFrame.getValue(),
             "activeSaveLocation": self.activeSaveFrame.getValue(),
             "hasSeenEditWarning": False,
+            "runGameFollowsActiveChapter": False,
         }
         return

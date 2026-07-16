@@ -56,5 +56,8 @@ class GameSelectPopup(Dialog):
         return True
 
     def apply(self):
-        self.result = {"launchData": self.gameSelectFrame.getValue()}
+        self.result = {
+            "launchData": self.gameSelectFrame.getValue(),
+            "runGameFollowsActiveChapter": self.gameSelectFrame.getFollowActiveChapter(),
+        }
         return
