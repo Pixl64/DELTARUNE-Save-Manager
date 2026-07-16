@@ -12,9 +12,10 @@ from tkinter.messagebox import (
 from typing import Any, Dict
 
 from src.config_load import loadAppConfig, loadUserConfig
-from src.file_utils import setUpDirectories
-from src.gui_utils import set_window_middle, setWindowIcon, ui_launchGame
+from src.file_utils import launch_game, setUpDirectories
+from src.gui_utils import set_window_middle, setWindowIcon
 from src.popup.backup_create import BackupCreatePopup
+from src.popup.game_select import GameSelectPopup
 from src.popup.settings import SettingsPopup
 from src.save_backup_restore import backupSave, restoreSave
 from src.save_editor.saveedit import SaveFileEdit
@@ -69,7 +70,7 @@ class App(Tk):
             backup_command=self.backupSaveCommand,
             restore_command=self.restoreSaveCommand,
             settings_command=self.showSettings,
-            launch_command=self.run_launch_game,
+            launch_command=self.ui_launchGame,
             delete_save_command=self.deleteSave,
             edit_save_command=self.editSave,
             download_example_saves_command=lambda: showinfo(
@@ -214,16 +215,29 @@ class App(Tk):
         self.chapterChange(currentChapter)  # Update the chapter select frame
         self.buttonBox.updateConfig(self.userConfig)
 
-    def run_launch_game(self) -> None:
-        ui_launchGame(
-            self,
-            self.appConfig,
-            self.userConfig,
-            chapter=self.buttonBox.getChapter(),
-        )
-        self.userConfig = (
-            loadUserConfig()
-        )  # Reload the user config in case it was changed by the game
+    def ui_launchGame(
+        self,
+    ) -> None:
+        if os.environ["DR_EXE_PATH"] == "NOT_SET":
+            popup = GameSelectPopup(self)
+            if not popup.result:
+                return
+
+            # Save the path to user_config.json
+            userConfig = loadUserConfig()
+            userConfig["launchData"] = popup.result["launchData"]
+            userConfig["runGameFollowsActiveChapter"] = popup.result.get(
+                "runGameFollowsActiveChapter", False
+            )
+            with open(
+                os.path.join(os.environ["DSM_PATH"], "user_config.json"), "w"
+            ) as f:
+                json.dump(userConfig, f, indent=4)
+            # Reload the userConfig from the file to ensure it is up to date
+            self.userConfig = loadUserConfig()
+
+        launch_game(self.appConfig, self.userConfig, self.buttonBox.getChapter())
+
         self.buttonBox.updateConfig(
             self.userConfig
         )  # Update the button box with the new config after launching the game
@@ -317,12 +331,7 @@ class App(Tk):
                     if confirmSteamOpen is None:
                         return
                     if confirmSteamOpen:
-                        ui_launchGame(
-                            self,
-                            self.appConfig,
-                            self.userConfig,
-                            chapter=currentSave["chapter"],
-                        )
+                        self.ui_launchGame()
                         showinfo(
                             title="Opening Game",
                             message="Opening the game to ensure the save is deleted. Please Press OK to continue when the game is open.",
