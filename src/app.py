@@ -9,7 +9,7 @@ from tkinter.messagebox import (
     showinfo,
     showwarning,
 )
-from typing import Any, Dict
+from typing import Any
 
 from src.config_load import loadAppConfig, loadUserConfig
 from src.file_utils import launch_game, setUpDirectories
@@ -26,7 +26,7 @@ from src.widgets.w_chapter_frame import ChapterSelectFrame
 
 
 class App(Tk):
-    def __init__(self, userConfig: Dict[str, Any], appConfig: Dict[str, Any]) -> None:
+    def __init__(self, userConfig: dict[str, Any], appConfig: dict[str, Any]) -> None:
         super().__init__()
         self.withdraw()  # Hide the main window until everything is set up
         self.title("DELTARUNE Save Manager")
@@ -197,7 +197,10 @@ class App(Tk):
 
     def showSettings(self) -> None:
         settingsPopup = SettingsPopup(
-            self, title="Settings", initialDir=os.environ["DSM_PATH"]
+            self,
+            self.appConfig["appID"],
+            title="Settings",
+            initialDir=os.environ["DSM_PATH"],
         )
         if not settingsPopup.result:
             return

@@ -15,10 +15,11 @@ from src.widgets.w_selectors import (
 
 
 class SettingsPopup(Dialog):
-    def __init__(self, parent, title="", initialDir="."):
+    def __init__(self, parent, appID, title="", initialDir="."):
         self.FileDialogueTitle = title
         self.initialDir = initialDir
         self.entryWidth = 40
+        self.appID = appID
 
         # Initialize the dialog
         super().__init__(parent, title=title)
@@ -49,7 +50,7 @@ class SettingsPopup(Dialog):
 
         self.openFolderButtonBox = OpenFolderButtonBox(self.mainFrame)
 
-        self.chapterLaunchPatch = ChapterLaunchPatch(self.mainFrame)
+        self.chapterLaunchPatch = ChapterLaunchPatch(self.mainFrame, self.appID)
 
         self.backupSaveFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)
         self.activeSaveFrame.pack(side=TOP, anchor=NW, padx=5, pady=5)

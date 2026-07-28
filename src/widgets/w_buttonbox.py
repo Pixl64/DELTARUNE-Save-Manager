@@ -1,9 +1,9 @@
 import os
 import subprocess
+from collections.abc import Callable
 from tkinter import Button, Frame, Label, LabelFrame, Spinbox, StringVar
 from tkinter.constants import DISABLED, EW, LEFT, NW, RIGHT, X
 from tkinter.messagebox import showerror, showinfo
-from typing import Callable
 
 from src.file_utils import (
     get_deltarune_location,
@@ -227,11 +227,11 @@ class OpenFolderButtonBox(LabelFrame):
 
 
 class ChapterLaunchPatch(LabelFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, appID):
         super().__init__(parent)
         self.parent = parent
         self.config(text="Chapter Launch Patch")
-
+        self.appID = appID
         self.grid_columnconfigure(0, weight=1)
 
         self.patchDescriptionLabel = Label(
@@ -258,14 +258,28 @@ class ChapterLaunchPatch(LabelFrame):
         self.unPatchButton.grid(row=1, column=1, padx=5, pady=2.5, sticky=EW)
 
     def patch_command(self):
-        res = link_music_to_chapters(get_deltarune_location())
+        try:
+            res = link_music_to_chapters(get_deltarune_location(self.appID))
+        except FileNotFoundError as e:
+            showerror(
+                title="Patch Error",
+                message=f"An error occurred while patching the /mus files:\n{e!s}",
+            )
+            return
         showinfo(
             title="Patch Result",
             message=res,
         )
 
     def unpatch_command(self):
-        res = remove_music_links(get_deltarune_location())
+        try:
+            res = remove_music_links(get_deltarune_location(self.appID))
+        except FileNotFoundError as e:
+            showerror(
+                title="Patch Error",
+                message=f"An error occurred while patching the /mus files:\n{e!s}",
+            )
+            return
         showinfo(
             title="Patch Result",
             message=res,

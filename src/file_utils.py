@@ -5,9 +5,10 @@ import shutil
 import stat
 import subprocess
 import sys
+from collections.abc import Callable
 from tkinter import Tk
 from tkinter.messagebox import askyesno, showerror
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 
 def copyFile(src: str, dest: str):
@@ -59,7 +60,7 @@ def get_steam_install_location():
     return None
 
 
-def setUpDirectories(appConfig: Dict[str, Any]) -> None:
+def setUpDirectories(appConfig: dict[str, Any]) -> None:
     """Sets up the chapter directories in the backup path"""
     for i in range(appConfig["maximumChapter"]):
         if not os.path.exists(os.path.join(os.environ["DSM_BKP_PATH"], f"CH{i + 1}")):
@@ -87,7 +88,7 @@ def validateFiles(runningDir: str, killSplash: Callable) -> bool:
 
 
 def validateChapterRun(
-    dir: str, appConfig: dict, userConfig: Dict[str, Any], chapter: Optional[int]
+    dir: str, appConfig: dict, userConfig: dict[str, Any], chapter: int | None
 ) -> bool:
     """Validates that chapter music junctions exist when using chapter launching."""
 
@@ -159,7 +160,11 @@ def link_music_to_chapters(root_dir):
 
             # Create relative symlink
 
-            subprocess.run(["cmd", "/c", "mklink", "/J", link_path, music_dir])
+            subprocess.run(
+                ["cmd", "/c", "mklink", "/J", link_path, music_dir],
+                shell=False,
+                check=False,
+            )
             count += 1
 
     return f"Created {count} music links in chapter folders."
@@ -199,21 +204,37 @@ def remove_music_links(root_dir):
     return f"Removed {count} music links. Skipped {skipped} real folders. Failed to remove {failed} links."
 
 
-def get_deltarune_location() -> Optional[str]:
+def get_deltarune_location(appID: int) -> str:
     if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
         steam_location = get_steam_install_location()
         if not steam_location:
             raise FileNotFoundError("Steam installation not found.")
 
-        deltarune_location = os.path.join(
-            steam_location, "steamapps", "common", "DELTARUNE"
+        steam_library_data = os.path.join(
+            steam_location, "steamapps", "libraryfolders.vdf"
         )
-        if not os.path.exists(deltarune_location):
+
+        if not os.path.exists(steam_library_data):
             raise FileNotFoundError(
-                "DELTARUNE installation not found in the Steam library."
+                "Steam libraryfolders.vdf not found. Please ensure Steam is installed and try again."
+            )
+        data = valve_data_to_dict(steam_library_data)
+
+        for lib in data["libraryfolders"].values():
+            if not isinstance(lib, dict):
+                continue
+
+            manifest = os.path.join(
+                lib["path"], "steamapps", f"appmanifest_{appID}.acf"
             )
 
-        return deltarune_location
+            if os.path.exists(manifest):
+                return os.path.join(lib["path"], "steamapps", "common", "DELTARUNE")
+
+        raise FileNotFoundError(
+            "DELTARUNE installation not found in any Steam library. Please ensure the game is installed and try again."
+        )
+
     else:
         if not os.path.exists(os.environ["DR_EXE_PATH"]):
             raise FileNotFoundError(
@@ -222,7 +243,7 @@ def get_deltarune_location() -> Optional[str]:
         return os.path.dirname(os.environ["DR_EXE_PATH"])
 
 
-def launch_game(appConfig: dict, userConfig: dict, chapter: Optional[int]) -> None:
+def launch_game(appConfig: dict, userConfig: dict, chapter: int | None) -> None:
     if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
         # Check if Steam is installed
         steamLocation = get_steam_install_location()
@@ -288,3 +309,43 @@ def launch_game(appConfig: dict, userConfig: dict, chapter: Optional[int]) -> No
             ],
             cwd=rf"{os.path.dirname(exe_path)}\chapter{chapter}_windows",
         )
+
+
+def valve_data_to_dict(filename):
+    """Convert a simple Steam VDF/ACF file into a Python dictionary."""
+
+    with open(filename, encoding="utf-8") as f:
+        lines = [line.strip() for line in f if line.strip()]
+
+    stack = []
+    root = {}
+    current = root
+    pending_key = None
+
+    for line in lines:
+        if line == "{":
+            # Start a new object for the previous key
+            new_dict = {}
+            current[pending_key] = new_dict
+            stack.append(current)
+            current = new_dict
+            pending_key = None
+
+        elif line == "}":
+            # Return to the parent object
+            current = stack.pop()
+
+        else:
+            # Split quoted strings
+            parts = [p.strip() for p in line.split('"')]
+            strings = [p for p in parts if p]
+
+            if len(strings) == 1:
+                # A key whose value is another object
+                pending_key = strings[0]
+
+            elif len(strings) >= 2:
+                # A normal key/value pair
+                current[strings[0]] = strings[1]
+
+    return root
