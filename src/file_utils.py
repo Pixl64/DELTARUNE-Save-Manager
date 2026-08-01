@@ -299,16 +299,30 @@ def launch_game(appConfig: dict, userConfig: dict, chapter: int | None) -> None:
         return
     else:
         exe_path = os.environ["DR_EXE_PATH"]
-
-        subprocess.Popen(
-            [
-                exe_path,
-                "-game",
-                "data.win",
-                "launcher",
-            ],
-            cwd=rf"{os.path.dirname(exe_path)}\chapter{chapter}_windows",
-        )
+        if (
+            chapter is not None
+            and chapter > 0
+            and chapter <= appConfig["maximumChapter"]
+        ):
+            subprocess.Popen(
+                [
+                    exe_path,
+                    "-game",
+                    "data.win",
+                    "launcher",
+                ],
+                cwd=rf"{os.path.dirname(exe_path)}\chapter{chapter}_windows",
+            )
+        else:
+            subprocess.Popen(
+                [
+                    exe_path,
+                    "-game",
+                    "data.win",
+                    "launcher",
+                ],
+                cwd=rf"{os.path.dirname(exe_path)}",
+            )
 
 
 def valve_data_to_dict(filename):
