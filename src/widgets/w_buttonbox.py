@@ -218,7 +218,10 @@ class OpenFolderButtonBox(LabelFrame):
             gamePath = os.path.join(steamPath, "steamapps", "common", "DELTARUNE")
 
         if os.path.exists(gamePath):
-            os.startfile(os.path.dirname(gamePath))
+            if gamePath.endswith(".exe"):
+                os.startfile(os.path.dirname(gamePath))
+            else:
+                os.startfile(gamePath)
         else:
             showerror(
                 title="Error",
