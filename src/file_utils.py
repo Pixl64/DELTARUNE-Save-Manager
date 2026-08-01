@@ -255,9 +255,8 @@ def launch_game(appConfig: dict, userConfig: dict, chapter: int | None) -> None:
             return
 
         # Check if the game is installed in the Steam library
-        deltaruneLocation = os.path.join(
-            steamLocation, "steamapps", "common", "DELTARUNE"
-        )
+        deltaruneLocation = get_deltarune_location(appConfig["appID"])
+        
         if not os.path.exists(deltaruneLocation):
             showerror(
                 title="Error",
