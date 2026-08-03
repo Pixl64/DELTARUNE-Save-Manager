@@ -283,12 +283,17 @@ def launch_game(appConfig: dict, userConfig: dict, chapter: int | None) -> None:
 
                 link_music_to_chapters(deltaruneLocation)
 
-            launchParameters = rf"//-game chapter{chapter}_windows\data.win launcher"
-        else:
-            launchParameters = ""
+            steam_exe = os.path.join(steamLocation, "Steam.exe")
 
-        os.startfile(f"steam://run/{appConfig['appID']}{launchParameters}")
+            os.startfile(
+                f"{steam_exe}",
+                arguments=rf"-applaunch {appConfig['appID']} -game chapter{chapter}_windows\data.win launcher",
+            )
+        else:
+            os.startfile(f"steam://run/{appConfig['appID']}")
+
         return
+
     if not os.path.exists(os.environ["DR_EXE_PATH"]):
         showerror(
             title="Error",
