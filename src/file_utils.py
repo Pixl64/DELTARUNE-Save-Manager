@@ -244,25 +244,13 @@ def get_deltarune_location(appID: int) -> str:
 
 
 def launch_game(appConfig: dict, userConfig: dict, chapter: int | None) -> None:
-    if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
-        # Check if Steam is installed
-        steamLocation = get_steam_install_location()
-        if not steamLocation:
-            showerror(
-                title="Error",
-                message="Steam installation not found. Please ensure Steam is installed and try again.",
-            )
-            return
-
-        # Check if the game is installed in the Steam library
+    try:
         deltaruneLocation = get_deltarune_location(appConfig["appID"])
-        if not os.path.exists(deltaruneLocation):
-            showerror(
-                title="Error",
-                message="DELTARUNE installation not found in the Steam library. Please ensure the game is installed and try again.",
-            )
-            return
+    except FileNotFoundError as e:
+        showerror(title="Error", message=str(e))
+        return
 
+    if os.environ["DR_EXE_PATH"] == "VIA_STEAM":
         # If the user has selected to launch a specific chapter, validate that the /mus folder exists for that chapter
         if (
             chapter is not None
@@ -283,6 +271,14 @@ def launch_game(appConfig: dict, userConfig: dict, chapter: int | None) -> None:
 
                 link_music_to_chapters(deltaruneLocation)
 
+            steamLocation = get_steam_install_location()
+            if not steamLocation:
+                showerror(
+                    title="Error",
+                    message="Steam installation not found. Please ensure Steam is installed and try again.",
+                )
+                return
+
             steam_exe = os.path.join(steamLocation, "Steam.exe")
 
             os.startfile(
@@ -302,16 +298,30 @@ def launch_game(appConfig: dict, userConfig: dict, chapter: int | None) -> None:
         return
     else:
         exe_path = os.environ["DR_EXE_PATH"]
-
-        subprocess.Popen(
-            [
-                exe_path,
-                "-game",
-                "data.win",
-                "launcher",
-            ],
-            cwd=rf"{os.path.dirname(exe_path)}\chapter{chapter}_windows",
-        )
+        if (
+            chapter is not None
+            and chapter > 0
+            and chapter <= appConfig["maximumChapter"]
+        ):
+            subprocess.Popen(
+                [
+                    exe_path,
+                    "-game",
+                    "data.win",
+                    "launcher",
+                ],
+                cwd=rf"{os.path.dirname(exe_path)}\chapter{chapter}_windows",
+            )
+        else:
+            subprocess.Popen(
+                [
+                    exe_path,
+                    "-game",
+                    "data.win",
+                    "launcher",
+                ],
+                cwd=rf"{os.path.dirname(exe_path)}",
+            )
 
 
 def valve_data_to_dict(filename):

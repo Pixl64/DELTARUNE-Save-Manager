@@ -7,7 +7,6 @@ from tkinter.messagebox import showerror, showinfo
 
 from src.file_utils import (
     get_deltarune_location,
-    get_steam_install_location,
     link_music_to_chapters,
     remove_music_links,
 )
@@ -139,7 +138,7 @@ class RightButtonBox(LabelFrame):
 
 
 class OpenFolderButtonBox(LabelFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, appID: int):
         super().__init__(parent)
         self.parent = parent
         self.config(text="Open Folder")
@@ -152,7 +151,9 @@ class OpenFolderButtonBox(LabelFrame):
         )
 
         self.exeLocationButton = Button(
-            self, text="Open Game Location", command=self.open_game_exe_location
+            self,
+            text="Open Game Location",
+            command=lambda: self.open_game_exe_location(appID),
         )
 
         self.backupSaveButton = Button(
@@ -198,7 +199,7 @@ class OpenFolderButtonBox(LabelFrame):
                 message=f"Backup Save Location does not exist.\n{backupSaveData}",
             )
 
-    def open_game_exe_location(self):
+    def open_game_exe_location(self, appID: int):
         gamePath = os.environ.get("DR_EXE_PATH", None)
         if gamePath is None or "NOT_SET" in gamePath:
             showerror(
@@ -207,18 +208,13 @@ class OpenFolderButtonBox(LabelFrame):
             )
             return
 
-        if gamePath == "VIA_STEAM":
-            steamPath = get_steam_install_location()
-            if steamPath is None:
-                showerror(
-                    title="Error",
-                    message="Steam installation location could not be found. Please set the Game Executable Location in the settings.",
-                )
-                return
-            gamePath = os.path.join(steamPath, "steamapps", "common", "DELTARUNE")
+        gamePath = get_deltarune_location(appID)
 
         if os.path.exists(gamePath):
-            os.startfile(os.path.dirname(gamePath))
+            if gamePath.endswith(".exe"):
+                os.startfile(os.path.dirname(gamePath))
+            else:
+                os.startfile(gamePath)
         else:
             showerror(
                 title="Error",
