@@ -48,7 +48,7 @@ class SettingsPopup(Dialog):
             entryWidth=self.entryWidth,
         )
 
-        self.openFolderButtonBox = OpenFolderButtonBox(self.mainFrame)
+        self.openFolderButtonBox = OpenFolderButtonBox(self.mainFrame, self.appID)
 
         self.chapterLaunchPatch = ChapterLaunchPatch(self.mainFrame, self.appID)
 
